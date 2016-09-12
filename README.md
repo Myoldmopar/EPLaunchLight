@@ -6,6 +6,6 @@ A super simple Python-GTK based EP Launch Tool
 
 Project is documented on ReadTheDocs. 
 
-# Testing [![Testing Status](https://travis-ci.org/Myoldmopar/EPLaunchLight.svg?branch=master)](https://travis-ci.org/    Myoldmopar/EPLaunchLight.svg?branch=master)
+# Testing [![Testing Status](https://travis-ci.org/Myoldmopar/EPLaunchLight.svg?branch=master)](http://travis-ci.org/Myoldmopar/EPLaunchLight)
 
 Project is continually tested using Travis CI.
