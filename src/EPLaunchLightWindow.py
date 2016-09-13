@@ -1,5 +1,8 @@
 import gtk
-from enums import FileTypes
+import glob
+
+from helpers import FileTypes, EnergyPlusPath
+
 
 class EPLaunchLightWindow(gtk.Window):
 
@@ -15,6 +18,9 @@ class EPLaunchLightWindow(gtk.Window):
 
         # build up the GUI itself
         self.build_gui()
+
+        # update the list of E+ versions
+        self.update_ep_versions()
 
     def go_away(self, what_else_goes_in_gtk_main_quit):
 
@@ -40,6 +46,14 @@ class EPLaunchLightWindow(gtk.Window):
 
         # shows all child widgets recursively
         self.show_all()
+
+    def update_ep_versions(self):
+
+        # get all the installed versions first, sorted
+        install_folders = glob.glob('/Applications/EnergyPlus*')
+        versions = sorted([EnergyPlusPath.get_version_number_from_path(x) for x in install_folders])
+        print("Available versions:")
+        print(versions)
 
     def gui_build_body(self):
 
@@ -116,4 +130,4 @@ class EPLaunchLightWindow(gtk.Window):
         print(widget)
 
     def update_settings(self, widget):
-		print(widget)
+        print(widget)
