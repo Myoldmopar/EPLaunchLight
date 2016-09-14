@@ -1,5 +1,4 @@
 import gtk
-import glob
 import os
 import gobject
 
@@ -10,23 +9,20 @@ from EnergyPlusThread import EnergyPlusThread
 
 class EPLaunchLightWindow(gtk.Window):
 
-    box_spacing = 3
-
     def __init__(self):
 
         # initialize the parent class
         super(EPLaunchLightWindow, self).__init__()
 
-        # initialize some instance variables to be set later
-        self.ep_versions = None
+        # initialize some class-level "constants"
+        self.box_spacing = 3
+
+        # initialize instance variables to be set later
         self.input_file_path = None
         self.weather_file_path = None
-        self.ep_version_list_store = None
-        self.ep_version_combobox = None
         self.button_sim = None
         self.button_cancel = None
         self.ep_run_folder = None
-        self.running_simulation_process = None
         self.running_simulation_thread = None
         self.message_label = None
 
@@ -40,36 +36,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.build_gui()
 
         # update the list of E+ versions
-        self.update_ep_versions()
-
-        # update the gui to handle a selected version
-        self.update_for_ep_version(pick_a_version=True)
-
-    def update_for_ep_version_from_widget(self, widget, pick_a_version=False):
-        print("**INSIDE update_for_ep_version_from_widget**")
-
-        self.update_for_ep_version(pick_a_version)
-
-    def update_for_ep_version(self, pick_a_version=False):
-        print("**INSIDE update_for_ep_version**")
-
-        # return if None, something went wrong
-        if self.ep_versions is None:
-            return None
-
-        # pick a version or choose the newly selected version
-        model = self.ep_version_combobox.get_model()
-        iterator = self.ep_version_combobox.get_active_iter()
-        if iterator is None or pick_a_version:
-            new_version = self.ep_versions[-1]
-        else:
-            new_version = model.get_value(iterator, 0)
-
-        # now update the run folder path
-        self.ep_run_folder = EnergyPlusPath.get_path_from_version_number(new_version)
-
-        # update
-        print("Updated for version %s; EP run path = %s" % (new_version, self.ep_run_folder))
+        self.ep_run_folder = EnergyPlusPath.get_latest_eplus_version()
 
     def build_gui(self):
 
@@ -82,6 +49,9 @@ class EPLaunchLightWindow(gtk.Window):
         # set the window title
         self.set_title("EnergyPlus Launch Light")
 
+        # set the background color
+        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DB5700"))
+
         # add the body
         self.add(self.gui_build_body())
 
@@ -90,38 +60,6 @@ class EPLaunchLightWindow(gtk.Window):
 
         # shows all child widgets recursively
         self.show_all()
-
-    def update_ep_versions_for_widget(self, widget):
-        print("**INSIDE update_ep_versions_for_widget**")
-        self.update_ep_versions()
-
-    def update_ep_versions(self):
-
-        print("**INSIDE update_ep_versions**")
-        # store the current entry so we can try to select it again if it's in the new list
-        current_entry = None
-        # if self.ep_version_combobox.get_has_entry():
-        model = self.ep_version_combobox.get_model()
-        iterator = self.ep_version_combobox.get_active_iter()
-        if iterator is not None:
-            current_entry = model.get_value(iterator, 0)
-
-        # get all the installed versions first, sorted
-        install_folders = glob.glob('/Applications/EnergyPlus*')
-
-        # then process them into a nice list
-        self.ep_versions = sorted([EnergyPlusPath.get_version_number_from_path(x) for x in install_folders])
-        self.ep_version_list_store.clear()
-        for version in self.ep_versions:
-            self.ep_version_list_store.append([version])
-
-        # set current_entry to something meaningful if needed
-        if current_entry is None:
-            current_entry = self.ep_versions[-1]
-
-        # check if the original is in the list and re-use it
-        if current_entry in self.ep_versions:
-            self.ep_version_combobox.set_active(self.ep_versions.index(current_entry))
 
     def gui_build_body(self):
 
@@ -150,20 +88,6 @@ class EPLaunchLightWindow(gtk.Window):
         self.weather_file_path.set_text("/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
         hbox2.pack_start(self.weather_file_path, True, True, self.box_spacing)
         vbox.pack_start(hbox2)
-
-        # create the EnergyPlus version switcher section, it will be populated after the fact
-        hbox = gtk.HBox(False, self.box_spacing)
-        self.ep_version_list_store = gtk.ListStore(str)
-        self.ep_version_combobox = gtk.ComboBox(self.ep_version_list_store)
-        self.ep_version_combobox.connect("changed", self.update_for_ep_version_from_widget)
-        cell = gtk.CellRendererText()
-        self.ep_version_combobox.pack_start(cell, True)
-        self.ep_version_combobox.add_attribute(cell, 'text', 0)
-        hbox.pack_start(self.ep_version_combobox, True, True, self.box_spacing)
-        button = gtk.Button("Refresh E+ Version List")
-        button.connect("clicked", self.update_ep_versions_for_widget)
-        hbox.pack_start(button, True, True, self.box_spacing)
-        vbox.pack_start(hbox)
 
         # create the simulate/cancel button section
         hbox3 = gtk.HBox(False, self.box_spacing)
