@@ -1,11 +1,11 @@
 import gtk
 import glob
 import os
-import subprocess
+import gobject
 
-import psutil
-
-from helpers import FileTypes, EnergyPlusPath
+from FileTypes import FileTypes
+from EnergyPlusPath import EnergyPlusPath
+from EnergyPlusThread import EnergyPlusThread
 
 
 class EPLaunchLightWindow(gtk.Window):
@@ -27,6 +27,11 @@ class EPLaunchLightWindow(gtk.Window):
         self.button_cancel = None
         self.ep_run_folder = None
         self.running_simulation_process = None
+        self.running_simulation_thread = None
+        self.message_label = None
+
+        # prepare threading
+        gobject.threads_init()
 
         # connect signals for the GUI
         self.connect("destroy", gtk.main_quit)
@@ -129,7 +134,7 @@ class EPLaunchLightWindow(gtk.Window):
         button1.connect("clicked", self.select_input_file, FileTypes.IDF)
         hbox1.pack_start(button1, False, False, self.box_spacing)
         self.input_file_path = gtk.Entry()
-        self.input_file_path.set_text("/tmp/RefBldgHospitalNew2004_Chicago.idf")
+        self.input_file_path.set_text("/tmp/1ZoneEvapCooler.idf")
         hbox1.pack_start(self.input_file_path, True, True, self.box_spacing)
         vbox.pack_start(hbox1)
 
@@ -165,12 +170,19 @@ class EPLaunchLightWindow(gtk.Window):
         alignment.add(self.button_sim)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
         self.button_cancel = gtk.Button("Cancel")
-        # self.button_cancel.set_sensitive(False)
         self.button_cancel.connect("clicked", self.cancel_simulation)
         alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.0)
         alignment.add(self.button_cancel)
+        self.update_run_buttons(running=False)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
         vbox.pack_start(hbox3)
+
+        # create the weather file button and textbox section
+        hbox = gtk.HBox(False, self.box_spacing)
+        self.message_label = gtk.Label()
+        self.message_label.set_text("Informational Messages Here")
+        hbox.pack_start(self.message_label, True, True, self.box_spacing)
+        vbox.pack_start(hbox)
 
         # return the vbox
         return vbox
@@ -199,25 +211,32 @@ class EPLaunchLightWindow(gtk.Window):
             dialog.destroy()
 
     def run_simulation(self, widget):
-        print("Going to run...")
-        print("Input File: %s" % self.input_file_path.get_text())
-        print("Weather File: %s" % self.weather_file_path.get_text())
-        self.running_simulation_process = subprocess.Popen(
-            [
-                os.path.join(self.ep_run_folder, 'runenergyplus'),
-                self.input_file_path.get_text(),
-                self.weather_file_path.get_text()
-            ],
-            shell=False
+        self.running_simulation_thread = EnergyPlusThread(
+            os.path.join(self.ep_run_folder, 'runenergyplus'),
+            self.input_file_path.get_text(),
+            self.weather_file_path.get_text(),
+            self.message,
+            self.completed_simulation
         )
+        self.running_simulation_thread.start()
+        self.update_run_buttons(running=True)
+
+    def update_run_buttons(self, running=False):
+        self.button_sim.set_sensitive(not running)
+        self.button_cancel.set_sensitive(running)
+
+    def message(self, message):
+        gobject.idle_add(self.message_handler, message)
+
+    def message_handler(self, message):
+        self.message_label.set_text(message)
+
+    def completed_simulation(self, std_out):
+        gobject.idle_add(self.completed_simulation_handler, std_out)
+
+    def completed_simulation_handler(self, std_out):
+        self.update_run_buttons(running=False)
 
     def cancel_simulation(self, widget):
-        print self.running_simulation_process.poll()
-        if self.running_simulation_process.poll() is None:
-            process = psutil.Process(self.running_simulation_process.pid)
-            for proc in process.children(recursive=True):
-                proc.kill()
-            process.kill()
+        self.running_simulation_object.try_to_stop = True
 
-    def update_settings(self, widget):
-        print(widget)
