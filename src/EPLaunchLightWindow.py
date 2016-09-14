@@ -134,7 +134,9 @@ class EPLaunchLightWindow(gtk.Window):
         button1.connect("clicked", self.select_input_file, FileTypes.IDF)
         hbox1.pack_start(button1, False, False, self.box_spacing)
         self.input_file_path = gtk.Entry()
-        self.input_file_path.set_text("/tmp/1ZoneEvapCooler.idf")
+        self.input_file_path.connect("changed", self.check_file_paths)
+        self.input_file_path.set_text("/tmp/RefBldgHospitalNew2004_Chicago.idf")
+        self.input_file_path.set_size_request(width=500, height=-1)
         hbox1.pack_start(self.input_file_path, True, True, self.box_spacing)
         vbox.pack_start(hbox1)
 
@@ -144,6 +146,7 @@ class EPLaunchLightWindow(gtk.Window):
         button1.connect("clicked", self.select_input_file, FileTypes.EPW)
         hbox2.pack_start(button1, False, False, self.box_spacing)
         self.weather_file_path = gtk.Entry()
+        self.weather_file_path.connect("changed", self.check_file_paths)
         self.weather_file_path.set_text("/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
         hbox2.pack_start(self.weather_file_path, True, True, self.box_spacing)
         vbox.pack_start(hbox2)
@@ -157,7 +160,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.ep_version_combobox.pack_start(cell, True)
         self.ep_version_combobox.add_attribute(cell, 'text', 0)
         hbox.pack_start(self.ep_version_combobox, True, True, self.box_spacing)
-        button = gtk.Button("Refresh")
+        button = gtk.Button("Refresh E+ Version List")
         button.connect("clicked", self.update_ep_versions_for_widget)
         hbox.pack_start(button, True, True, self.box_spacing)
         vbox.pack_start(hbox)
@@ -180,8 +183,10 @@ class EPLaunchLightWindow(gtk.Window):
         # create the weather file button and textbox section
         hbox = gtk.HBox(False, self.box_spacing)
         self.message_label = gtk.Label()
-        self.message_label.set_text("Informational Messages Here")
-        hbox.pack_start(self.message_label, True, True, self.box_spacing)
+        self.message_label.set_text("Ready for launch")
+        alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.0)
+        alignment.add(self.message_label)
+        hbox.pack_start(alignment, True, True, self.box_spacing)
         vbox.pack_start(hbox)
 
         # return the vbox
@@ -238,5 +243,18 @@ class EPLaunchLightWindow(gtk.Window):
         self.update_run_buttons(running=False)
 
     def cancel_simulation(self, widget):
-        self.running_simulation_thread.try_to_stop = True
+        self.running_simulation_thread.stop()
+
+    def check_file_paths(self, widget):
+        if self.weather_file_path is None or self.input_file_path is None or self.message_label is None:
+            return  # we are probably doing early initialization of the GUI
+        idf = self.input_file_path.get_text()
+        epw = self.weather_file_path.get_text()
+        if os.path.exists(idf) and os.path.exists(epw):
+            self.message_handler("Ready for launch")
+            self.button_sim.set_sensitive(True)
+        else:
+            self.message_handler("Input and/or Weather file paths are invalid")
+            self.button_sim.set_sensitive(False)
+
 
