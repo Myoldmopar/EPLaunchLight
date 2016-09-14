@@ -184,6 +184,27 @@ class EPLaunchLightWindow(gtk.Window):
 
     def completed_simulation_handler(self, std_out):
         self.update_run_buttons(running=False)
+        label = gtk.Label('\n' + std_out)
+        # label.set_line_wrap(True)
+        result_dialog = gtk.Dialog("Simulation Output",
+                                   self,
+                                   gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                                   (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
+                                   )
+        scrolled_results = gtk.ScrolledWindow()
+        scrolled_results.set_border_width(10)
+        scrolled_results.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
+        scrolled_results.add_with_viewport(label)
+        scrolled_results.show()
+        result_dialog.vbox.pack_start(scrolled_results, True, True, 0)
+        label.show()
+        result_dialog.set_size_request(width=400,height=600)
+        result_dialog.run()
+        result_dialog.destroy()
+        # label = gtk.Label(std_out)
+        # label.set_line_wrap(True)
+        # scrolled_results.add_with_viewport(label)
+        # result_dialog.show()
 
     def cancel_simulation(self, widget):
         self.running_simulation_thread.stop()
