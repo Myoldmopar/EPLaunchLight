@@ -238,5 +238,5 @@ class EPLaunchLightWindow(gtk.Window):
         self.update_run_buttons(running=False)
 
     def cancel_simulation(self, widget):
-        self.running_simulation_object.try_to_stop = True
+        self.running_simulation_thread.try_to_stop = True
 
