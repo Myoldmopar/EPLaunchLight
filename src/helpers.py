@@ -1,5 +1,4 @@
 class FileTypes:
-
     IDF = 1
     EPW = 2
 
@@ -14,18 +13,18 @@ class FileTypes:
             pattern_message = "EPW files"
             pattern = "*.epw"
         else:
-			return None
+            return None
         return message, pattern_message, pattern
 
+
 class EnergyPlusPath:
+    @staticmethod
+    def get_version_number_from_path(path):
+        ep_folder = path.split('/')[2]
+        if not 'EnergyPlus' in ep_folder:
+            return None
+        return ep_folder[11:]
 
-	@staticmethod
-	def get_version_number_from_path(path):
-		ep_folder = path.split('/')[2]
-		if not 'EnergyPlus' in ep_folder:
-			return None
-		return ep_folder[11:]
-
-	@staticmethod
-	def get_path_from_version_number(version):
-		return '/Applications/EnergyPlus-%s' % version
+    @staticmethod
+    def get_path_from_version_number(version):
+        return '/Applications/EnergyPlus-%s' % version
