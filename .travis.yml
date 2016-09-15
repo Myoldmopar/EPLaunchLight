@@ -1,12 +1,14 @@
 language: python
 
 python:
-- '2.7'
+  - '2.7'
 
-install: pip install -r requirements.txt
+install:
+  - brew update
+  - brew install pygtk
 
 script:
-- python test/test_base.py
+  - python test/test_base.py
 
 deploy:
   provider: releases
