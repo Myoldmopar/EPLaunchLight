@@ -1,4 +1,18 @@
 language: python
 
+python:
+- '2.7'
+
+install: pip install -r requirements.txt
+
 script:
-  - python test/test_base.py
+- python test/test_base.py
+
+deploy:
+  provider: releases
+  api_key:
+    secure: Akih+lPnXwxWXEtjlQIDBKaOCuqnk6yP2xKhc/3oLHkD/wWHDCwo10LVZYz7p0aIES922NvsitHPICDdAW1xnUogYfukCMkiqsYQXoM5RNcT+xeufwph9XiVYLhfzZn8HrQW/GyhaI34m9WLqbjSVb/iWxsDZ/NuAMtdMMenJXN/4xQHrJXCLtrdz+HR59PPS9/S5UbfGbx0N27tY5XoaoqDj+SyBFOsveM2Z3EEfKZaozfk+FRc0nBXZInVQr11/MLCgIXE2L9IoPUQNd6RJPQqaP1PkK4f4D+CDoBe1rfsphr2/Er6yLF3JwSZuh8GGKyyBEonHVJBpO/tKf8boWBVGgKEcgNA1PYAody682hfg8zfnuYvaeQNX1RPf28Phay7ITv1aE8RGjaj/Mr45iNPjGh1OJXM9GH/Ucpbs70GDZBlIO2PBwfiD/K2cc8Z1oeTeEf7VgpWqNu/+EAV0XtBLy3ERS/+qU5sj6XTxphSVfF3L0CMgMw9UpmGll+TzYTAcOaXULL4zNo/A4EyZ71C4qJ8dNMnZhs2cRcRgUBGfjlsP14nn/vKup6EuzKZMmtXCo48U/1Fp5uUa2YZBKEnFzd24/TzLTt7sVOgWtjAoSkQY5zHudXpp0gkih/0SeVuQCp7IH1fp88Vyc1xo13G1kpfP9B/7jIUNhYvzlA=
+  file: dist/main.app
+  on:
+    repo: Myoldmopar/EPLaunchLight
+    tags: true
