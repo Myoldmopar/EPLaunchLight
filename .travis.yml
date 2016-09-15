@@ -4,7 +4,9 @@ python:
 install: true
 script:
 - python test/test_base.py
-- python build_product.py
+
+# take out this dummy deployment until we figure out how to actually build proper packages
+#- python build_product.py
 #deploy:
 #  provider: releases
 #  api_key:
