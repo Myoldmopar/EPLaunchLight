@@ -9,7 +9,10 @@ from setuptools import setup
 
 APP = ['EnergyPlusLaunchLight.py']
 DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
+OPTIONS = {
+    'argv_emulation': True,
+    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk']
+}
 
 setup(
     app=APP,
