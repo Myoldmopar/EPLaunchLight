@@ -8,8 +8,14 @@ from EnergyPlusThread import EnergyPlusThread
 
 
 class EPLaunchLightWindow(gtk.Window):
+    """
+    This class is the main window class for EP-Luanch-Light
+    """
 
     def __init__(self):
+        """
+        This initializer function creates instance variables, sets up threading, and builds the GUI
+        """
 
         # initialize the parent class
         super(EPLaunchLightWindow, self).__init__()
@@ -40,6 +46,9 @@ class EPLaunchLightWindow(gtk.Window):
         self.ep_run_folder = EnergyPlusPath.get_latest_eplus_version()
 
     def build_gui(self):
+        """
+        This function manages the window construction, including position, title, and presentation
+        """
 
         # put the window in the center of the (primary? current?) screen
         self.set_position(gtk.WIN_POS_CENTER)
@@ -49,9 +58,6 @@ class EPLaunchLightWindow(gtk.Window):
 
         # set the window title
         self.set_title("EnergyPlus Launch Light")
-
-        # set the background color
-        # self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("#DB5700"))
 
         # add the body
         self.add(self.gui_build_body())
@@ -63,6 +69,11 @@ class EPLaunchLightWindow(gtk.Window):
         self.show_all()
 
     def gui_build_body(self):
+        """
+        This function builds out the specific widgets on the GUI
+
+        * Returns: A gtk.VBox suitable for adding directly onto the main gtk.Window
+        """
 
         # create a vbox here first
         vbox = gtk.VBox(False, self.box_spacing)

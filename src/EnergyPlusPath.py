@@ -2,8 +2,20 @@ import glob
 
 
 class EnergyPlusPath(object):
+    """
+    This class provides static helpers for moving between EnergyPlus install paths and version numbers
+
+    *Note that this class holds no instance data.*
+    """
+
     @staticmethod
     def get_version_number_from_path(path):
+        """
+        This function takes a Mac EnergyPlus installation path, and returns just the version number portion
+
+        * path: An installation path on Mac, following the form: '/Applications/EnergyPlus-?-?-?/'
+        * Returns: Just the version number suffix, in the form: '?-?-?'
+        """
         ep_folder = path.split('/')[2]
         if 'EnergyPlus' not in ep_folder:
             return None

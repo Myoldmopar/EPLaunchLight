@@ -11,6 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   EnergyPlusPath
+   EnergyPlusThread
+   FileTypes
+   EPLaunchLightWindow
 
 
 Indices and tables
