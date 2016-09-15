@@ -1,4 +1,4 @@
-from src import EPLaunchLightWindow
+from EPLaunchLight import EPLaunchLightWindow
 import gtk
 
 # once done doing any preliminary processing, actually run the application

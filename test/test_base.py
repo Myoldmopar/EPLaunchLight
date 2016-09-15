@@ -4,7 +4,7 @@ import unittest
 import threading
 
 # add the source directory to the path so the unit test framework can find it
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'EPLaunchLight'))
 
 from FileTypes import FileTypes
 from EnergyPlusPath import EnergyPlusPath
