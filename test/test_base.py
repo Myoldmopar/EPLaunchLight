@@ -56,6 +56,7 @@ class TestEnergyPlusThread(unittest.TestCase):
         self.assertTrue(obj.input_file, paths[1])
         self.assertTrue(obj.weather_file, paths[2])
 
+
 # allow execution directly as python tests/test_ghx.py
 if __name__ == '__main__':
     unittest.main()

@@ -7,3 +7,12 @@ install: true
 
 script:
   - python test/test_base.py
+  - python build_product.py
+
+deploy:
+  provider: releases
+  api_key: ec2f1c75a90a352c495e6cedd2e35d4209528e9a
+  file: built_product.txt
+  skip_cleanup: true
+  on:
+    tage: true
