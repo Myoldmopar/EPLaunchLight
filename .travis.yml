@@ -2,8 +2,11 @@ language: objective-c
 
 os: osx
 
-before_install:
-  - pip install pygtk py2app
+install:
+  - brew install wget
+  - wget http://downloads.sourceforge.net/project/macpkg/XZ/5.0.5/XZ.pkg?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fmacpkg%2Ffiles%2FPyGTK%2F2.24.0%2F&ts=1473913301&use_mirror=superb-sea2
+  - installer -pkg PyGTK.pkg -target /
+  - pip install py2app
 
 script:
   - python test/test_base.py
