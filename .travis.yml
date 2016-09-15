@@ -1,16 +1,34 @@
-language: python
+language: objective-c
 
 os: osx
 
-python:
-  - '2.7'
+before_install:
+  # Avoid conflict with system-installed versions of various libraries by
+  # removing all homebrew packages, then re-installing wget.
+  - brew remove --force $(brew list)
+  - brew install wget pygtk
 
 install:
-  - brew update
-  - brew install pygtk
+  - wget https://repo.continuum.io/miniconda/Miniconda-3.10.1-MacOSX-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/Users/travis/miniconda/bin:$PATH
+  - conda update --quiet --yes conda
+  - conda install --quiet --yes pip nomkl numpy scipy matplotlib=1.4.3=np19py27_2 pandas astropy pygments pyzmq ipython=3 scikit-image h5py py requests pytz mock requests pytest pyside
+  - conda remove --force --yes setuptools
+  - pip install setuptools
+  - pip install macholib==1.5.1 modulegraph==0.11 py2app==0.7
+  - pip install pyavm plotly awscli==1.3.16 astrodendro
+  - git clone git://github.com/glue-viz/glue.git
+  - cd glue
+  - git checkout $TRAVIS_BRANCH
+  - python setup.py install
+  - cd ../
+  - conda list
 
 script:
   - python test/test_base.py
+  - python setup.py py2app
 
 deploy:
   provider: releases
