@@ -10,6 +10,6 @@ Project is documented on ReadTheDocs.
 
 Project is continually tested using Travis CI.
 
-# Releases [![Release](https://img.shields.io/badge/release-latest-green.svg)](https://github.com/Myoldmopar/EPLaunchLight/releases/latest)
+# Releases [![Release](https://img.shields.io/badge/release-latest-brightgreen.svg)](https://github.com/Myoldmopar/EPLaunchLight/releases/latest)
 
 Hoping to build with Travis, although there are limitations with using the combination of Travis + pygtk + py2app.
