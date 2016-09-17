@@ -6,11 +6,16 @@ import threading
 # add the source directory to the path so the unit test framework can find it
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'EPLaunchLight'))
 
-from FileTypes import FileTypes
+try:
+    from FileTypes import FileTypes
+    has_gtk = True
+except ImportError as e:
+    has_gtk = False
 from EnergyPlusPath import EnergyPlusPath
 from EnergyPlusThread import EnergyPlusThread
 
 
+@unittest.skipIf(not has_gtk, "Cannot run FileTypes tests without gtk")
 class TestFileTypes(unittest.TestCase):
     def test_idf_file_type(self):
         msg, filters = FileTypes.get_materials(FileTypes.IDF)
