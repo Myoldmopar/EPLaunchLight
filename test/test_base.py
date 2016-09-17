@@ -13,19 +13,23 @@ from EnergyPlusThread import EnergyPlusThread
 
 class TestFileTypes(unittest.TestCase):
     def test_idf_file_type(self):
-        a, b, c = FileTypes.get_materials(FileTypes.IDF)
-        self.assertTrue('input' in a)
-        self.assertEqual(b, "IDF files")
-        self.assertEqual(c, "*.idf")
+        msg, filters = FileTypes.get_materials(FileTypes.IDF)
+        self.assertEqual(len(filters), 2)  # should return 2: idf and imf
+        # make sure we have each one, idf and imf
+        idf_filters = [x for x in filters if 'IDF' in x.get_name()]
+        self.assertTrue(len(idf_filters), 1)
+        imf_filters = [x for x in filters if 'IMF' in x.get_name()]
+        self.assertTrue(len(imf_filters), 1)
 
     def test_epw_file_type(self):
-        a, b, c = FileTypes.get_materials(FileTypes.EPW)
-        self.assertTrue('weather' in a)
-        self.assertEqual(b, "EPW files")
-        self.assertEqual(c, "*.epw")
+        msg, filters = FileTypes.get_materials(FileTypes.EPW)
+        self.assertEqual(len(filters), 1)
+        epw_filters = [x for x in filters if 'EPW' in x.get_name()]
+        self.assertTrue(len(epw_filters), 1)
 
     def test_invalid_file_type(self):
-        result = FileTypes.get_materials('abcdef')
+        msg, result = FileTypes.get_materials('abcdef')
+        self.assertIsNone(msg)
         self.assertIsNone(result)
 
 
@@ -50,7 +54,7 @@ class TestEnergyPlusPaths(unittest.TestCase):
 class TestEnergyPlusThread(unittest.TestCase):
     def test_construction(self):
         paths = ['/dummy/', '/path', '/to_nothing']
-        obj = EnergyPlusThread(paths[0], paths[1], paths[2], None, None)
+        obj = EnergyPlusThread(paths[0], paths[1], paths[2], None, None, None, None)
         self.assertTrue(isinstance(obj, threading.Thread))
         self.assertTrue(obj.run_script, paths[0])
         self.assertTrue(obj.input_file, paths[1])

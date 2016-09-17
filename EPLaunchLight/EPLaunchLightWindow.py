@@ -21,7 +21,7 @@ class EPLaunchLightWindow(gtk.Window):
         super(EPLaunchLightWindow, self).__init__()
 
         # initialize some class-level "constants"
-        self.box_spacing = 10
+        self.box_spacing = 4
 
         # initialize instance variables to be set later
         self.input_file_path = None
@@ -32,6 +32,11 @@ class EPLaunchLightWindow(gtk.Window):
         self.running_simulation_thread = None
         self.status_bar = None
         self.status_bar_context_id = None
+        self.ep_version_label = None
+
+        # initialize the last used folder path in the input file dialog
+        # TODO: Persist this in a config file, along with history of files run
+        self.last_folder_path = os.path.expanduser("~")
 
         # prepare threading
         gobject.threads_init()
@@ -44,6 +49,8 @@ class EPLaunchLightWindow(gtk.Window):
 
         # update the list of E+ versions
         self.ep_run_folder = EnergyPlusPath.get_latest_eplus_version()
+        just_version_number = EnergyPlusPath.get_version_number_from_path(self.ep_run_folder)
+        self.ep_version_label.set_text(EnergyPlusPath.get_descriptor_from_version_number(just_version_number))
 
     def build_gui(self):
         """
@@ -67,6 +74,15 @@ class EPLaunchLightWindow(gtk.Window):
 
         # shows all child widgets recursively
         self.show_all()
+
+    def framed(self, thing, color_code="#DB5700"):
+        frames_on = False
+        if not frames_on:
+            return thing
+        f = gtk.Frame()
+        f.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse(color_code))
+        f.add(thing)
+        return f
 
     def gui_build_body(self):
         """
@@ -95,7 +111,7 @@ class EPLaunchLightWindow(gtk.Window):
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.input_file_path)
         hbox1.pack_start(alignment, True, True, self.box_spacing)
-        vbox.pack_start(hbox1, True, True, 0)
+        vbox.pack_start(self.framed(hbox1), True, True, 0)
 
         # create the weather file button and textbox section
         hbox2 = gtk.HBox(False, self.box_spacing)
@@ -111,10 +127,10 @@ class EPLaunchLightWindow(gtk.Window):
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.weather_file_path)
         hbox2.pack_start(alignment, True, True, self.box_spacing)
-        vbox.pack_start(hbox2, True, True, 0)
+        vbox.pack_start(self.framed(hbox2), True, True, 0)
 
         # separator
-        vbox.pack_start(gtk.HSeparator(), False)
+        vbox.pack_start(self.framed(gtk.HSeparator()), False)
 
         # create the simulate/cancel button section
         hbox3 = gtk.HBox(False, self.box_spacing)
@@ -129,37 +145,48 @@ class EPLaunchLightWindow(gtk.Window):
         alignment.add(self.button_cancel)
         self.update_run_buttons(running=False)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
-        vbox.pack_start(hbox3, True, True, 0)
+        vbox.pack_start(self.framed(hbox3), True, True, 0)
 
         # separator
-        vbox.pack_start(gtk.HSeparator(), False)
+        vbox.pack_start(self.framed(gtk.HSeparator()), False)
 
         # create the status bar
+        hbox = gtk.HBox(False, self.box_spacing)
+        self.ep_version_label = gtk.Label()
+        self.ep_version_label.set_text("E+ Version")
+        aligner = gtk.Alignment(1, 1, 1, 1)
+        aligner.add(self.ep_version_label)
+        hbox.pack_start(self.framed(gtk.VSeparator()), False)
+        hbox.pack_start(aligner, False, True, 0)
         self.status_bar = gtk.Statusbar()
         self.status_bar.set_has_resize_grip(False)
         self.status_bar_context_id = self.status_bar.get_context_id("Statusbar example")
         self.status_bar.push(self.status_bar_context_id, "Ready for launch")
         aligner = gtk.Alignment(1, 1, 1, 0)
         aligner.add(self.status_bar)
-        vbox.pack_end(aligner, False, True, 0)
+        hbox.pack_start(self.framed(gtk.VSeparator()), False)
+        hbox.pack_start(aligner)
+        vbox.pack_end(self.framed(hbox), False, True, 0)
+        hbox.pack_start(self.framed(gtk.VSeparator()), False)
 
         # return the vbox
         return vbox
 
     def select_input_file(self, widget, flag):
-        message, pattern_message, pattern = FileTypes.get_materials(flag)
+        message, file_filters = FileTypes.get_materials(flag)
         dialog = gtk.FileChooserDialog(
             title=message,
             action=gtk.FILE_CHOOSER_ACTION_OPEN,
             buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK)
         )
         dialog.set_select_multiple(False)
-        file_filter = gtk.FileFilter()
-        file_filter.set_name(pattern_message)
-        file_filter.add_pattern(pattern)
-        dialog.add_filter(file_filter)
+        for file_filter in file_filters:
+            dialog.add_filter(file_filter)
+        if self.last_folder_path is not None:
+            dialog.set_current_folder(self.last_folder_path)
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
+            self.last_folder_path = dialog.get_current_folder()
             if flag == FileTypes.IDF:
                 self.input_file_path.set_text(dialog.get_filename())
             elif flag == FileTypes.EPW:
@@ -171,11 +198,13 @@ class EPLaunchLightWindow(gtk.Window):
 
     def run_simulation(self, widget):
         self.running_simulation_thread = EnergyPlusThread(
-            os.path.join(self.ep_run_folder, 'runenergyplus'),
+            os.path.join(self.ep_run_folder, 'EnergyPlus'),
             self.input_file_path.get_text(),
             self.weather_file_path.get_text(),
             self.message,
-            self.completed_simulation
+            self.callback_handler_success,
+            self.callback_handler_failure,
+            self.callback_handler_cancelled
         )
         self.running_simulation_thread.start()
         self.update_run_buttons(running=True)
@@ -190,17 +219,49 @@ class EPLaunchLightWindow(gtk.Window):
     def message_handler(self, message):
         self.status_bar.push(self.status_bar_context_id, message)
 
-    def completed_simulation(self, std_out):
-        gobject.idle_add(self.completed_simulation_handler, std_out)
+    def callback_handler_cancelled(self):
+        gobject.idle_add(self.cancelled_simulation)
 
-    def completed_simulation_handler(self, std_out):
+    def cancelled_simulation(self):
         self.update_run_buttons(running=False)
-        label = gtk.Label('\n' + std_out)
+
+    def callback_handler_failure(self, std_out):
+        gobject.idle_add(self.failed_simulation, std_out)
+
+    def failed_simulation(self, std_out):
+        self.update_run_buttons(running=False)
+        message = gtk.MessageDialog(parent=self,
+                                    flags=0,
+                                    type=gtk.MESSAGE_ERROR,
+                                    buttons=gtk.BUTTONS_NONE,
+                                    message_format="EnergyPlus Failed!")
+        message.set_title("EnergyPlus Failed")
+        message.format_secondary_text("Check error file and other output files")
+        message.run()
+        message.destroy()
+
+    def callback_handler_success(self, std_out):
+        gobject.idle_add(self.completed_simulation, std_out)
+
+    def completed_simulation(self, std_out):
+        # update the GUI buttons
+        self.update_run_buttons(running=False)
+        # create the dialog
         result_dialog = gtk.Dialog("Simulation Output",
                                    self,
                                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                                    (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
                                    )
+        # put a description label
+        label = gtk.Label("EnergyPlus Simulation Output:")
+        label.show()
+        aligner = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=1.0)
+        aligner.add(label)
+        aligner.show()
+        result_dialog.vbox.pack_start(aligner, False, True, 0)
+
+        # put the actual simulation results
+        label = gtk.Label(std_out)
         scrolled_results = gtk.ScrolledWindow()
         scrolled_results.set_border_width(10)
         scrolled_results.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_ALWAYS)
@@ -208,11 +269,12 @@ class EPLaunchLightWindow(gtk.Window):
         scrolled_results.show()
         result_dialog.vbox.pack_start(scrolled_results, True, True, 0)
         label.show()
-        result_dialog.set_size_request(width=400,height=600)
+        result_dialog.set_size_request(width=500, height=600)
         result_dialog.run()
         result_dialog.destroy()
 
     def cancel_simulation(self, widget):
+        self.button_cancel.set_sensitive(False)
         self.running_simulation_thread.stop()
 
     def check_file_paths(self, widget):

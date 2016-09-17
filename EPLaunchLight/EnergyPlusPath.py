@@ -26,6 +26,10 @@ class EnergyPlusPath(object):
         return '/Applications/EnergyPlus-%s' % version
 
     @staticmethod
+    def get_descriptor_from_version_number(version):
+        return 'Running EnergyPlus %s' % version.replace('-', '.')
+
+    @staticmethod
     def get_latest_eplus_version():
         # get all the installed versions first, sorted
         install_folders = glob.glob('/Applications/EnergyPlus*')
