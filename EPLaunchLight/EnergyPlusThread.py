@@ -1,10 +1,13 @@
-import threading
-import subprocess
 import os
+import subprocess
+import threading
+
+from International import translate as _
 
 
 class EnergyPlusThread(threading.Thread):
-    def __init__(self, run_script, input_file, weather_file, msg_callback, success_callback, failure_callback, cancelled_callback):
+    def __init__(self, run_script, input_file, weather_file, msg_callback, success_callback, failure_callback,
+                 cancelled_callback):
         self.p = None
         self.std_out = None
         self.std_err = None
@@ -21,9 +24,12 @@ class EnergyPlusThread(threading.Thread):
 
     def run(self):
         self.cancelled = False
-        self.run_dir = os.path.join(os.path.dirname(self.input_file), 'output-' + os.path.splitext(os.path.basename(self.input_file))[0])
+        self.run_dir = os.path.join(os.path.dirname(self.input_file),
+                                    'output-' + os.path.splitext(os.path.basename(self.input_file))[0])
         self.p = subprocess.Popen([
             self.run_script,
+            '-r',
+            '-x',
             '-d',
             self.run_dir,
             '-w',
@@ -33,22 +39,27 @@ class EnergyPlusThread(threading.Thread):
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        self.msg_callback("Simulation started")
+        self.msg_callback(_("Simulation started"))
         self.std_out, self.std_err = self.p.communicate()
         if self.cancelled:
-            self.msg_callback("Simulation cancelled")
+            self.msg_callback(_("Simulation cancelled"))
             self.cancelled_callback()
         else:
             if self.p.returncode == 0:
-                self.msg_callback("Simulation completed")
+                self.msg_callback(_("Simulation completed"))
                 self.success_callback(self.std_out, self.run_dir)
             else:
-                self.msg_callback("Simulation failed")
+                self.msg_callback(_("Simulation failed"))
                 self.failure_callback(self.std_out, self.run_dir)
+
+    @staticmethod
+    def get_ep_version(run_script):
+        p = subprocess.Popen([run_script, '-v'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        std_out, std_err = p.communicate()
+        return std_out.strip()
 
     def stop(self):
         if self.p.poll() is None:
-            self.msg_callback("Attempting to cancel simulation ...")
-            # os.system('pkill -TERM -P {pid}'.format(pid=self.p.pid))
+            self.msg_callback(_("Attempting to cancel simulation ..."))
             self.cancelled = True
             self.p.kill()

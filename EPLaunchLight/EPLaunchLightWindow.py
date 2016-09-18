@@ -7,6 +7,15 @@ import subprocess
 from FileTypes import FileTypes
 from EnergyPlusPath import EnergyPlusPath
 from EnergyPlusThread import EnergyPlusThread
+from International import translate as _, Languages, set_language
+
+
+class Keys:
+    last_idf_folder = 'last_idf_folder'
+    last_epw_folder = 'last_epw_folder'
+    last_idf = 'last_idf'
+    last_epw = 'last_epw'
+    language = 'language'
 
 
 class EPLaunchLightWindow(gtk.Window):
@@ -37,9 +46,10 @@ class EPLaunchLightWindow(gtk.Window):
         self.status_bar_context_id = None
         self.ep_version_label = None
 
-        # try to load the settings
+        # try to load the settings very early since it includes initialization
         self.settings = None
         self.load_settings()
+        set_language(self.settings[Keys.language])
 
         # prepare threading
         gobject.threads_init()
@@ -52,8 +62,7 @@ class EPLaunchLightWindow(gtk.Window):
 
         # update the list of E+ versions
         self.ep_run_folder = EnergyPlusPath.get_latest_eplus_version()
-        just_version_number = EnergyPlusPath.get_version_number_from_path(self.ep_run_folder)
-        self.ep_version_label.set_text(EnergyPlusPath.get_descriptor_from_version_number(just_version_number))
+        self.ep_version_label.set_text(EnergyPlusThread.get_ep_version(os.path.join(self.ep_run_folder, 'EnergyPlus')))
 
         # for good measure, check the validity of the idf/epw versions once at load time
         self.check_file_paths(None)
@@ -63,18 +72,20 @@ class EPLaunchLightWindow(gtk.Window):
             self.settings = json.load(open(self.settings_file_name))
         except Exception:
             self.settings = {}
-        if 'last_idf_folder' not in self.settings:
-            self.settings['last_idf_folder'] = os.path.expanduser("~")
-        if 'last_epw_folder' not in self.settings:
-            self.settings['last_epw_folder'] = os.path.expanduser("~")
-        if 'last_idf' not in self.settings:
-            self.settings['last_idf'] = '/path/to/idf'
-        if 'last_epw' not in self.settings:
-            self.settings['last_epw'] = '/path/to/epw'
+        if Keys.last_idf_folder not in self.settings:
+            self.settings[Keys.last_idf_folder] = os.path.expanduser("~")
+        if Keys.last_epw_folder not in self.settings:
+            self.settings[Keys.last_epw_folder] = os.path.expanduser("~")
+        if Keys.last_idf not in self.settings:
+            self.settings[Keys.last_idf] = '/path/to/idf'
+        if Keys.last_epw not in self.settings:
+            self.settings[Keys.last_epw] = '/path/to/epw'
+        if Keys.language not in self.settings:
+            self.settings[Keys.language] = Languages.English
 
     def save_settings(self):
         try:
-            json.dump(self.settings, open(self.settings_file_name,'w'))
+            json.dump(self.settings, open(self.settings_file_name, 'w'))
         except Exception:
             pass
 
@@ -97,7 +108,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.set_border_width(0)
 
         # set the window title
-        self.set_title("EnergyPlus Launch Light")
+        self.set_title(_("EnergyPlus Launch Light"))
 
         # add the body
         self.add(self.gui_build_body())
@@ -132,7 +143,7 @@ class EPLaunchLightWindow(gtk.Window):
 
         # create the input file button and textbox section
         hbox1 = gtk.HBox(False, self.box_spacing)
-        button1 = gtk.Button("Choose Input File..")
+        button1 = gtk.Button(_("Choose Input File.."))
         button1.connect("clicked", self.select_input_file, FileTypes.IDF)
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(button1)
@@ -148,14 +159,15 @@ class EPLaunchLightWindow(gtk.Window):
 
         # create the weather file button and textbox section
         hbox2 = gtk.HBox(False, self.box_spacing)
-        button1 = gtk.Button("Choose Weather File..")
+        button1 = gtk.Button(_("Choose Weather File.."))
         button1.connect("clicked", self.select_input_file, FileTypes.EPW)
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(button1)
         hbox2.pack_start(alignment, True, True, self.box_spacing)
         self.weather_file_path = gtk.Entry()
         self.weather_file_path.connect("changed", self.check_file_paths)
-        self.weather_file_path.set_text(self.settings['last_epw'])  # '"/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
+        self.weather_file_path.set_text(
+            self.settings['last_epw'])  # '"/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
         self.weather_file_path.set_size_request(width=500, height=-1)
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.weather_file_path)
@@ -167,16 +179,21 @@ class EPLaunchLightWindow(gtk.Window):
 
         # create the simulate/cancel button section
         hbox3 = gtk.HBox(False, self.box_spacing)
-        self.button_sim = gtk.Button("Simulate")
+        self.button_sim = gtk.Button(_("Simulate"))
         self.button_sim.connect("clicked", self.run_simulation)
         alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.5)
         alignment.add(self.button_sim)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
-        self.button_cancel = gtk.Button("Cancel")
+        self.button_cancel = gtk.Button(_("Cancel"))
         self.button_cancel.connect("clicked", self.cancel_simulation)
         alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.5)
         alignment.add(self.button_cancel)
         self.update_run_buttons(running=False)
+        hbox3.pack_start(alignment, True, True, self.box_spacing)
+        self.button_language = gtk.Button(_("Switch language"))
+        self.button_language.connect("clicked", self.switch_language)
+        alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.5)
+        alignment.add(self.button_language)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
         vbox.pack_start(self.framed(hbox3), True, True, 0)
 
@@ -186,15 +203,15 @@ class EPLaunchLightWindow(gtk.Window):
         # create the status bar
         hbox = gtk.HBox(False, self.box_spacing)
         self.ep_version_label = gtk.Label()
-        self.ep_version_label.set_text("E+ Version")
-        aligner = gtk.Alignment(1, 1, 1, 1)
+        self.ep_version_label.set_text(_("E+ Version"))
+        aligner = gtk.Alignment(1, 0.5, 1, 1)
         aligner.add(self.ep_version_label)
         hbox.pack_start(self.framed(gtk.VSeparator()), False)
         hbox.pack_start(aligner, False, True, 0)
         self.status_bar = gtk.Statusbar()
         self.status_bar.set_has_resize_grip(False)
         self.status_bar_context_id = self.status_bar.get_context_id("Statusbar example")
-        self.status_bar.push(self.status_bar_context_id, "Ready for launch")
+        self.status_bar.push(self.status_bar_context_id, _("Ready for launch"))
         aligner = gtk.Alignment(1, 1, 1, 0)
         aligner.add(self.status_bar)
         hbox.pack_start(self.framed(gtk.VSeparator()), False)
@@ -205,12 +222,29 @@ class EPLaunchLightWindow(gtk.Window):
         # return the vbox
         return vbox
 
+    def switch_language(self, widget):
+        if self.settings[Keys.language] == Languages.English:
+            self.settings[Keys.language] = Languages.Spanish
+        elif self.settings[Keys.language] == Languages.Spanish:
+            self.settings[Keys.language] = Languages.English
+        dialog = gtk.MessageDialog(
+            parent=self,
+            flags=0,
+            type=gtk.MESSAGE_ERROR,
+            buttons=gtk.BUTTONS_OK,
+            message_format=_("EnergyPlus Launch Light"))
+        dialog.set_title(_("Message"))
+        dialog.format_secondary_text(
+            _("Restart the app to make the language change take effect"))
+        dialog.run()
+        dialog.destroy()
+
     def select_input_file(self, widget, flag):
         message, file_filters = FileTypes.get_materials(flag)
         if flag == FileTypes.IDF:
-            key = 'last_idf_folder'
+            key = Keys.last_idf_folder
         else:
-            key = 'last_epw_folder'
+            key = Keys.last_epw_folder
         dialog = gtk.FileChooserDialog(
             title=message,
             action=gtk.FILE_CHOOSER_ACTION_OPEN,
@@ -230,7 +264,7 @@ class EPLaunchLightWindow(gtk.Window):
                 self.weather_file_path.set_text(dialog.get_filename())
             dialog.destroy()
         else:
-            print("Cancelled!")
+            print(_("Cancelled!"))
             dialog.destroy()
 
     def run_simulation(self, widget):
@@ -271,11 +305,12 @@ class EPLaunchLightWindow(gtk.Window):
                                     flags=0,
                                     type=gtk.MESSAGE_ERROR,
                                     buttons=gtk.BUTTONS_YES_NO,
-                                    message_format="EnergyPlus Failed!")
-        message.set_title("EnergyPlus Failed")
-        message.format_secondary_text("Error file is the best place to start.  Would you like to open the Run Folder?")
+                                    message_format=_("EnergyPlus Failed!"))
+        message.set_title(_("EnergyPlus Failed"))
+        message.format_secondary_text(
+            _("Error file is the best place to start.  Would you like to open the Run Folder?"))
         response = message.run()
-        if response ==  gtk.RESPONSE_YES:
+        if response == gtk.RESPONSE_YES:
             subprocess.Popen(['open', run_dir], shell=False)
         message.destroy()
 
@@ -286,13 +321,13 @@ class EPLaunchLightWindow(gtk.Window):
         # update the GUI buttons
         self.update_run_buttons(running=False)
         # create the dialog
-        result_dialog = gtk.Dialog("Simulation Output",
+        result_dialog = gtk.Dialog(_("Simulation Output"),
                                    self,
                                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                   ("Open Run Directory", gtk.RESPONSE_YES, gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT)
+                                   (_("Open Run Directory"), gtk.RESPONSE_YES, _("Close"), gtk.RESPONSE_ACCEPT)
                                    )
         # put a description label
-        label = gtk.Label("EnergyPlus Simulation Output:")
+        label = gtk.Label(_("EnergyPlus Simulation Output:"))
         label.show()
         aligner = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=1.0)
         aligner.add(label)
@@ -323,13 +358,11 @@ class EPLaunchLightWindow(gtk.Window):
             return  # we are probably doing early initialization of the GUI
         idf = self.input_file_path.get_text()
         epw = self.weather_file_path.get_text()
-        self.settings['last_idf'] = idf
-        self.settings['last_epw'] = epw
+        self.settings[Keys.last_idf] = idf
+        self.settings[Keys.last_epw] = epw
         if os.path.exists(idf) and os.path.exists(epw):
-            self.message_handler("Ready for launch")
+            self.message_handler(_("Ready for launch"))
             self.button_sim.set_sensitive(True)
         else:
-            self.message_handler("Input and/or Weather file paths are invalid")
+            self.message_handler(_("Input and/or Weather file paths are invalid"))
             self.button_sim.set_sensitive(False)
-
-
