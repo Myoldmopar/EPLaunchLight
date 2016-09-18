@@ -38,7 +38,6 @@ class EPLaunchLightWindow(gtk.Window):
         self.ep_version_label = None
 
         # try to load the settings
-        # TODO: Persist this in a config file, along with history of files run
         self.settings = None
         self.load_settings()
 
@@ -64,8 +63,10 @@ class EPLaunchLightWindow(gtk.Window):
             self.settings = json.load(open(self.settings_file_name))
         except Exception:
             self.settings = {}
-        if 'last_folder_path' not in self.settings:
-            self.settings['last_folder_path'] = os.path.expanduser("~")
+        if 'last_idf_folder' not in self.settings:
+            self.settings['last_idf_folder'] = os.path.expanduser("~")
+        if 'last_epw_folder' not in self.settings:
+            self.settings['last_epw_folder'] = os.path.expanduser("~")
         if 'last_idf' not in self.settings:
             self.settings['last_idf'] = '/path/to/idf'
         if 'last_epw' not in self.settings:
@@ -206,6 +207,10 @@ class EPLaunchLightWindow(gtk.Window):
 
     def select_input_file(self, widget, flag):
         message, file_filters = FileTypes.get_materials(flag)
+        if flag == FileTypes.IDF:
+            key = 'last_idf_folder'
+        else:
+            key = 'last_epw_folder'
         dialog = gtk.FileChooserDialog(
             title=message,
             action=gtk.FILE_CHOOSER_ACTION_OPEN,
@@ -214,11 +219,11 @@ class EPLaunchLightWindow(gtk.Window):
         dialog.set_select_multiple(False)
         for file_filter in file_filters:
             dialog.add_filter(file_filter)
-        if self.settings['last_folder_path'] is not None:
-            dialog.set_current_folder(self.settings['last_folder_path'])
+        if self.settings[key] is not None:
+            dialog.set_current_folder(self.settings[key])
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
-            self.settings['last_folder_path'] = dialog.get_current_folder()
+            self.settings[key] = dialog.get_current_folder()
             if flag == FileTypes.IDF:
                 self.input_file_path.set_text(dialog.get_filename())
             elif flag == FileTypes.EPW:
