@@ -11,7 +11,7 @@ APP = ['EnergyPlusLaunchLight.py']
 DATA_FILES = []
 OPTIONS = {
     'argv_emulation': True,
-    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk']
+    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'subprocess']
 }
 
 setup(

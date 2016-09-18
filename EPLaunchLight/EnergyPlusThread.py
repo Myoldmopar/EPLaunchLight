@@ -16,14 +16,16 @@ class EnergyPlusThread(threading.Thread):
         self.failure_callback = failure_callback
         self.cancelled_callback = cancelled_callback
         self.cancelled = False
+        self.run_dir = ''
         threading.Thread.__init__(self)
 
     def run(self):
         self.cancelled = False
+        self.run_dir = os.path.join(os.path.dirname(self.input_file), 'output-' + os.path.splitext(os.path.basename(self.input_file))[0])
         self.p = subprocess.Popen([
             self.run_script,
             '-d',
-            os.path.join(os.path.dirname(self.input_file), 'output-' + os.path.splitext(os.path.basename(self.input_file))[0]),
+            self.run_dir,
             '-w',
             self.weather_file,
             self.input_file
@@ -39,10 +41,10 @@ class EnergyPlusThread(threading.Thread):
         else:
             if self.p.returncode == 0:
                 self.msg_callback("Simulation completed")
-                self.success_callback(self.std_out)
+                self.success_callback(self.std_out, self.run_dir)
             else:
                 self.msg_callback("Simulation failed")
-                self.failure_callback(self.std_out)
+                self.failure_callback(self.std_out, self.run_dir)
 
     def stop(self):
         if self.p.poll() is None:

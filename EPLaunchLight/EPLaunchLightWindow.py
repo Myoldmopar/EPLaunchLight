@@ -2,6 +2,7 @@ import gtk
 import json
 import os
 import gobject
+import subprocess
 
 from FileTypes import FileTypes
 from EnergyPlusPath import EnergyPlusPath
@@ -256,32 +257,34 @@ class EPLaunchLightWindow(gtk.Window):
     def cancelled_simulation(self):
         self.update_run_buttons(running=False)
 
-    def callback_handler_failure(self, std_out):
-        gobject.idle_add(self.failed_simulation, std_out)
+    def callback_handler_failure(self, std_out, run_dir):
+        gobject.idle_add(self.failed_simulation, std_out, run_dir)
 
-    def failed_simulation(self, std_out):
+    def failed_simulation(self, std_out, run_dir):
         self.update_run_buttons(running=False)
         message = gtk.MessageDialog(parent=self,
                                     flags=0,
                                     type=gtk.MESSAGE_ERROR,
-                                    buttons=gtk.BUTTONS_NONE,
+                                    buttons=gtk.BUTTONS_YES_NO,
                                     message_format="EnergyPlus Failed!")
         message.set_title("EnergyPlus Failed")
-        message.format_secondary_text("Check error file and other output files")
-        message.run()
+        message.format_secondary_text("Error file is the best place to start.  Would you like to open the Run Folder?")
+        response = message.run()
+        if response ==  gtk.RESPONSE_YES:
+            subprocess.Popen(['open', run_dir], shell=False)
         message.destroy()
 
-    def callback_handler_success(self, std_out):
-        gobject.idle_add(self.completed_simulation, std_out)
+    def callback_handler_success(self, std_out, run_dir):
+        gobject.idle_add(self.completed_simulation, std_out, run_dir)
 
-    def completed_simulation(self, std_out):
+    def completed_simulation(self, std_out, run_dir):
         # update the GUI buttons
         self.update_run_buttons(running=False)
         # create the dialog
         result_dialog = gtk.Dialog("Simulation Output",
                                    self,
                                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                   (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
+                                   ("Open Run Directory", gtk.RESPONSE_YES, gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT)
                                    )
         # put a description label
         label = gtk.Label("EnergyPlus Simulation Output:")
@@ -301,7 +304,9 @@ class EPLaunchLightWindow(gtk.Window):
         result_dialog.vbox.pack_start(scrolled_results, True, True, 0)
         label.show()
         result_dialog.set_size_request(width=500, height=600)
-        result_dialog.run()
+        resp = result_dialog.run()
+        if resp == gtk.RESPONSE_YES:
+            subprocess.Popen(['open', run_dir], shell=False)
         result_dialog.destroy()
 
     def cancel_simulation(self, widget):
