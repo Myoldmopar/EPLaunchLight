@@ -1,4 +1,5 @@
 import gtk
+import json
 import os
 import gobject
 
@@ -22,6 +23,7 @@ class EPLaunchLightWindow(gtk.Window):
 
         # initialize some class-level "constants"
         self.box_spacing = 4
+        self.settings_file_name = os.path.join(os.path.expanduser("~"), ".eplaunchlight.json")
 
         # initialize instance variables to be set later
         self.input_file_path = None
@@ -34,15 +36,16 @@ class EPLaunchLightWindow(gtk.Window):
         self.status_bar_context_id = None
         self.ep_version_label = None
 
-        # initialize the last used folder path in the input file dialog
+        # try to load the settings
         # TODO: Persist this in a config file, along with history of files run
-        self.last_folder_path = os.path.expanduser("~")
+        self.settings = None
+        self.load_settings()
 
         # prepare threading
         gobject.threads_init()
 
         # connect signals for the GUI
-        self.connect("destroy", gtk.main_quit)
+        self.connect("destroy", self.quit)
 
         # build up the GUI itself
         self.build_gui()
@@ -51,6 +54,34 @@ class EPLaunchLightWindow(gtk.Window):
         self.ep_run_folder = EnergyPlusPath.get_latest_eplus_version()
         just_version_number = EnergyPlusPath.get_version_number_from_path(self.ep_run_folder)
         self.ep_version_label.set_text(EnergyPlusPath.get_descriptor_from_version_number(just_version_number))
+
+        # for good measure, check the validity of the idf/epw versions once at load time
+        self.check_file_paths(None)
+
+    def load_settings(self):
+        try:
+            self.settings = json.load(open(self.settings_file_name))
+        except Exception:
+            self.settings = {}
+        if 'last_folder_path' not in self.settings:
+            self.settings['last_folder_path'] = os.path.expanduser("~")
+        if 'last_idf' not in self.settings:
+            self.settings['last_idf'] = '/path/to/idf'
+        if 'last_epw' not in self.settings:
+            self.settings['last_epw'] = '/path/to/epw'
+
+    def save_settings(self):
+        try:
+            json.dump(self.settings, open(self.settings_file_name,'w'))
+        except Exception:
+            pass
+
+    def quit(self, widget=None):
+        try:
+            self.save_settings()
+        except Exception:
+            pass
+        gtk.main_quit()
 
     def build_gui(self):
         """
@@ -106,7 +137,7 @@ class EPLaunchLightWindow(gtk.Window):
         hbox1.pack_start(alignment, True, True, self.box_spacing)
         self.input_file_path = gtk.Entry()
         self.input_file_path.connect("changed", self.check_file_paths)
-        self.input_file_path.set_text("/tmp/RefBldgHospitalNew2004_Chicago.idf")
+        self.input_file_path.set_text(self.settings['last_idf'])  # "/tmp/RefBldgHospitalNew2004_Chicago.idf")
         self.input_file_path.set_size_request(width=500, height=-1)
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.input_file_path)
@@ -122,7 +153,7 @@ class EPLaunchLightWindow(gtk.Window):
         hbox2.pack_start(alignment, True, True, self.box_spacing)
         self.weather_file_path = gtk.Entry()
         self.weather_file_path.connect("changed", self.check_file_paths)
-        self.weather_file_path.set_text("/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
+        self.weather_file_path.set_text(self.settings['last_epw'])  # '"/Users/elee/EnergyPlus/repos/2eplus/weather/CZ06RV2.epw")
         self.weather_file_path.set_size_request(width=500, height=-1)
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.weather_file_path)
@@ -182,11 +213,11 @@ class EPLaunchLightWindow(gtk.Window):
         dialog.set_select_multiple(False)
         for file_filter in file_filters:
             dialog.add_filter(file_filter)
-        if self.last_folder_path is not None:
-            dialog.set_current_folder(self.last_folder_path)
+        if self.settings['last_folder_path'] is not None:
+            dialog.set_current_folder(self.settings['last_folder_path'])
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
-            self.last_folder_path = dialog.get_current_folder()
+            self.settings['last_folder_path'] = dialog.get_current_folder()
             if flag == FileTypes.IDF:
                 self.input_file_path.set_text(dialog.get_filename())
             elif flag == FileTypes.EPW:
@@ -282,6 +313,8 @@ class EPLaunchLightWindow(gtk.Window):
             return  # we are probably doing early initialization of the GUI
         idf = self.input_file_path.get_text()
         epw = self.weather_file_path.get_text()
+        self.settings['last_idf'] = idf
+        self.settings['last_epw'] = epw
         if os.path.exists(idf) and os.path.exists(epw):
             self.message_handler("Ready for launch")
             self.button_sim.set_sensitive(True)
