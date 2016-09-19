@@ -1,5 +1,4 @@
 import gtk
-import json
 import os
 import gobject
 import subprocess
@@ -8,14 +7,7 @@ from FileTypes import FileTypes
 from EnergyPlusPath import EnergyPlusPath
 from EnergyPlusThread import EnergyPlusThread
 from International import translate as _, Languages, set_language
-
-
-class Keys:
-    last_idf_folder = 'last_idf_folder'
-    last_epw_folder = 'last_epw_folder'
-    last_idf = 'last_idf'
-    last_epw = 'last_epw'
-    language = 'language'
+from Settings import Keys
 
 
 class EPLaunchLightWindow(gtk.Window):
@@ -23,13 +15,16 @@ class EPLaunchLightWindow(gtk.Window):
     This class is the main window class for EP-Luanch-Light
     """
 
-    def __init__(self):
+    def __init__(self, settings):
         """
         This initializer function creates instance variables, sets up threading, and builds the GUI
         """
 
         # initialize the parent class
         super(EPLaunchLightWindow, self).__init__()
+
+        # this flag will be used to trigger a restart from the calling manager
+        self.doing_restart = False
 
         # initialize some class-level "constants"
         self.box_spacing = 4
@@ -47,8 +42,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.ep_version_label = None
 
         # try to load the settings very early since it includes initialization
-        self.settings = None
-        self.load_settings()
+        self.settings = settings
         set_language(self.settings[Keys.language])
 
         # prepare threading
@@ -67,34 +61,8 @@ class EPLaunchLightWindow(gtk.Window):
         # for good measure, check the validity of the idf/epw versions once at load time
         self.check_file_paths(None)
 
-    def load_settings(self):
-        try:
-            self.settings = json.load(open(self.settings_file_name))
-        except Exception:
-            self.settings = {}
-        if Keys.last_idf_folder not in self.settings:
-            self.settings[Keys.last_idf_folder] = os.path.expanduser("~")
-        if Keys.last_epw_folder not in self.settings:
-            self.settings[Keys.last_epw_folder] = os.path.expanduser("~")
-        if Keys.last_idf not in self.settings:
-            self.settings[Keys.last_idf] = '/path/to/idf'
-        if Keys.last_epw not in self.settings:
-            self.settings[Keys.last_epw] = '/path/to/epw'
-        if Keys.language not in self.settings:
-            self.settings[Keys.language] = Languages.English
-
-    def save_settings(self):
-        try:
-            json.dump(self.settings, open(self.settings_file_name, 'w'))
-        except Exception:
-            pass
-
     def quit(self, widget=None):
-        try:
-            self.save_settings()
-        except Exception:
-            pass
-        gtk.main_quit()
+        gobject.idle_add(gtk.main_quit)
 
     def build_gui(self):
         """
@@ -138,8 +106,38 @@ class EPLaunchLightWindow(gtk.Window):
         # create a vbox here first
         vbox = gtk.VBox(False, self.box_spacing)
 
+        # create the menu bar itself to hold the menus
+        mb = gtk.MenuBar()
+        menu_item_english = gtk.MenuItem("Language: English")
+        menu_item_english.connect("activate", self.switch_language, Languages.English)
+        menu_item_english.show()
+        if self.settings[Keys.language] == Languages.English:
+            menu_item_english.set_sensitive(False)
+        menu_item_spanish = gtk.MenuItem("Idioma: Espanol")
+        menu_item_spanish.connect("activate", self.switch_language, Languages.Spanish)
+        menu_item_spanish.show()
+        if self.settings[Keys.language] == Languages.Spanish:
+            menu_item_spanish.set_sensitive(False)
+        menu_item_file_exit = gtk.MenuItem(_("Exit"))
+        menu_item_file_exit.connect("activate", self.quit)
+        menu_item_file_exit.show()
+
+        # create the base root menu item for FILE
+        menu_item_file = gtk.MenuItem(_("File"))
+
+        # create a menu to hold FILE items and put them in there
+        filemenu = gtk.Menu()
+        filemenu.append(menu_item_english)
+        filemenu.append(menu_item_spanish)
+        filemenu.append(gtk.SeparatorMenuItem())
+        filemenu.append(menu_item_file_exit)
+        menu_item_file.set_submenu(filemenu)
+
+        # attach the FILE menu to the main menu bar
+        mb.append(menu_item_file)
+
         # separator
-        vbox.pack_start(gtk.HSeparator(), False)
+        vbox.pack_start(mb, False)
 
         # create the input file button and textbox section
         hbox1 = gtk.HBox(False, self.box_spacing)
@@ -190,11 +188,11 @@ class EPLaunchLightWindow(gtk.Window):
         alignment.add(self.button_cancel)
         self.update_run_buttons(running=False)
         hbox3.pack_start(alignment, True, True, self.box_spacing)
-        self.button_language = gtk.Button(_("Switch language"))
-        self.button_language.connect("clicked", self.switch_language)
-        alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.5)
-        alignment.add(self.button_language)
-        hbox3.pack_start(alignment, True, True, self.box_spacing)
+        # self.button_language = gtk.Button(_("Switch language"))
+        # self.button_language.connect("clicked", self.switch_language)
+        # alignment = gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0.5, yscale=0.5)
+        # alignment.add(self.button_language)
+        # hbox3.pack_start(alignment, True, True, self.box_spacing)
         vbox.pack_start(self.framed(hbox3), True, True, 0)
 
         # separator
@@ -222,22 +220,23 @@ class EPLaunchLightWindow(gtk.Window):
         # return the vbox
         return vbox
 
-    def switch_language(self, widget):
-        if self.settings[Keys.language] == Languages.English:
-            self.settings[Keys.language] = Languages.Spanish
-        elif self.settings[Keys.language] == Languages.Spanish:
-            self.settings[Keys.language] = Languages.English
+    def switch_language(self, widget, language):
+        self.settings[Keys.language] = language
         dialog = gtk.MessageDialog(
             parent=self,
             flags=0,
             type=gtk.MESSAGE_ERROR,
-            buttons=gtk.BUTTONS_OK,
+            buttons=gtk.BUTTONS_YES_NO,
             message_format=_("EnergyPlus Launch Light"))
         dialog.set_title(_("Message"))
         dialog.format_secondary_text(
-            _("Restart the app to make the language change take effect"))
-        dialog.run()
+            _("You must restart the app to make the language change take effect.  Would you like to restart now?"))
+        resp = dialog.run()
+        if resp == gtk.RESPONSE_YES:
+            self.doing_restart = True
         dialog.destroy()
+        if self.doing_restart:
+            self.quit(None)
 
     def select_input_file(self, widget, flag):
         message, file_filters = FileTypes.get_materials(flag)

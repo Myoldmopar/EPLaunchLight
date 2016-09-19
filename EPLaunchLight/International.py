@@ -25,13 +25,15 @@ EnglishDictionary = {
     'EPW files': 'EPW files',
     'Error file is the best place to start.  Would you like to open the Run Folder?':
         'Error file is the best place to start.  Would you like to open the Run Folder?',
+    'Exit': 'Exit',
+    'File': 'File',
     'IDF files': 'IDF files',
     'Input and/or Weather file paths are invalid': 'Input and/or Weather file paths are invalid',
     'Message': 'Message',
     'Open Run Directory': 'Open Run Directory',
     'Ready for launch': 'Ready for launch',
-    'Restart the app to make the language change take effect':
-        'Restart the app to make the language change take effect',
+    'You must restart the app to make the language change take effect.  Would you like to restart now?':
+        'You must restart the app to make the language change take effect.  Would you like to restart now?',
     'Select input file': 'Select input file',
     'Select weather file': 'Select weather file',
     'Simulate': 'Simulate',
@@ -56,13 +58,15 @@ SpanishDictionary = {
     'EPW files': 'EPW archivos',
     'Error file is the best place to start.  Would you like to open the Run Folder?':
         'Archivo de errores es el mejor lugar para empezar. Le gustaria abrir la carpeta Run?',
+    'Exit': 'Salida',
+    'File': 'Archivo',
     'IDF files': 'IDF archivos',
     'Input and/or Weather file paths are invalid': 'Las rutas de entrada y/o archivos de tiempo no son validos',
     'Message': 'Mensaje',
     'Open Run Directory': 'Directorio de ejecucion abierta',
     'Ready for launch': 'Listo para su lanzamiento',
-    'Restart the app to make the language change take effect':
-        'Reiniciar la aplicacion para que el cambio de idioma surtiran efecto',
+    'You must restart the app to make the language change take effect.  Would you like to restart now?':
+        'Debe reiniciar la aplicacion para que el cambio de idioma tenga efecto. Le gustaria reiniciar ahora?',
     'Select input file': 'Seleccionar archivo de entrada',
     'Select weather file': 'Seleccionar archivo de tiempo',
     'Simulate': 'Simular',
