@@ -12,6 +12,9 @@ def set_language(lang):
 
 
 EnglishDictionary = {
+    'About...': 'About...',
+    'About this program:': 'About this program:',
+    'ABOUT_DIALOG': 'This program was created by NREL for the United States Department of Energy.',
     'Cancel': 'Cancel',
     'Cancelled!': 'Cancelled!',
     'Choose Input File..': 'Choose Input File..',
@@ -49,6 +52,9 @@ EnglishDictionary = {
 }
 
 SpanishDictionary = {
+    'About...': 'Acerca de...',
+    'About this program:': 'Acerca de este programa',
+    'ABOUT_DIALOG': 'Este programa fue creado por el NREL para el Departamento de Energia de los Estados Unidos.',
     'Cancel': 'Cancelar',
     'Cancelled!': 'Cancelado!',
     'Choose Input File..': 'Elija el archivo de entrada..',
@@ -77,7 +83,7 @@ SpanishDictionary = {
     'Select input file': 'Seleccionar archivo de entrada',
     'Select weather file': 'Seleccionar archivo de tiempo',
     'Simulate': 'Simular',
-    'Simulation cancelled': 'simulacion cancelado',
+    'Simulation cancelled': 'Simulacion cancelado',
     'Simulation Output': 'Salida de la simulacion',
     'Simulation completed': 'Simulacion completado',
     'Simulation failed': 'Simulacion fallo',
@@ -101,11 +107,7 @@ def translate(key):
     if key is None or key == "":
         return ""
 
-    # if English, just return the original key without looking anything up
-    if CurrentLanguage == Languages.English:
-        return key
-
-    # otherwise, start with English, but swtich based on language
+    # start with English, but switch based on language
     dictionary = EnglishDictionary
     if CurrentLanguage == Languages.Spanish:
         dictionary = SpanishDictionary

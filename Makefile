@@ -7,3 +7,5 @@ package:
 html:
 	make -C docs html
 
+listimports:
+	grep -r '^import' --include="*.py" * | cut -d: -f2 | sort | uniq | cut -c 8-

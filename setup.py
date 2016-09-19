@@ -7,11 +7,11 @@ Usage:
 
 from setuptools import setup
 
-APP = ['EnergyPlusLaunchLight.py']
+APP = ['EP-Launch-Lite.py']
 DATA_FILES = []
 OPTIONS = {
     'argv_emulation': True,
-    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'subprocess']
+    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'subprocess', 'glob', 'json', 'subprocess']
 }
 
 setup(

@@ -11,7 +11,7 @@ from International import translate as _, Languages, set_language
 from Settings import Keys
 
 
-__program_name__ = "EP-Launch-Lite"
+__program_name__ = "EP-Launch-Lite (v2.0)"
 
 
 class Window(gtk.Window):
@@ -125,6 +125,9 @@ class Window(gtk.Window):
         menu_item_spanish.show()
         if self.settings[Keys.language] == Languages.Spanish:
             menu_item_spanish.set_sensitive(False)
+        menu_item_file_about = gtk.MenuItem(_("About..."))
+        menu_item_file_about.connect("activate", self.about_dialog)
+        menu_item_file_about.show()
         menu_item_file_exit = gtk.MenuItem(_("Exit"))
         menu_item_file_exit.connect("activate", self.quit)
         menu_item_file_exit.show()
@@ -136,6 +139,8 @@ class Window(gtk.Window):
         filemenu = gtk.Menu()
         filemenu.append(menu_item_english)
         filemenu.append(menu_item_spanish)
+        filemenu.append(gtk.SeparatorMenuItem())
+        filemenu.append(menu_item_file_about)
         filemenu.append(gtk.SeparatorMenuItem())
         filemenu.append(menu_item_file_exit)
         menu_item_file.set_submenu(filemenu)
@@ -394,8 +399,19 @@ class Window(gtk.Window):
                                     flags=0,
                                     type=gtk.MESSAGE_ERROR,
                                     buttons=gtk.BUTTONS_OK,
-                                    message_format=__program_name__)
-        message.set_title(_("Error performing prior action:"))
+                                    message_format=_("Error performing prior action:"))
+        message.set_title(__program_name__)
         message.format_secondary_text(message_text)
+        message.run()
+        message.destroy()
+
+    def about_dialog(self, widget):
+        message = gtk.MessageDialog(parent=self,
+                                    flags=0,
+                                    type=gtk.MESSAGE_INFO,
+                                    buttons=gtk.BUTTONS_OK,
+                                    message_format=_("About this program:"))
+        message.set_title(__program_name__)
+        message.format_secondary_text(_("ABOUT_DIALOG"))
         message.run()
         message.destroy()
