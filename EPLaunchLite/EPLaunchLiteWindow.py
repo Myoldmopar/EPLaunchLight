@@ -417,7 +417,7 @@ class Window(gtk.Window):
                                     flags=0,
                                     type=gtk.MESSAGE_INFO,
                                     buttons=gtk.BUTTONS_OK,
-                                    message_format=_("About this program:"))
+                                    message_format=__program_name__)
         message.set_title(__program_name__)
         message.format_secondary_text(_("ABOUT_DIALOG"))
         message.run()
