@@ -1,18 +1,22 @@
-import gtk
 import os
-import gobject
 import subprocess
 
-from FileTypes import FileTypes
+import gobject
+import gtk
+
 from EnergyPlusPath import EnergyPlusPath
 from EnergyPlusThread import EnergyPlusThread
+from FileTypes import FileTypes
 from International import translate as _, Languages, set_language
 from Settings import Keys
 
 
-class EPLaunchLightWindow(gtk.Window):
+__program_name__ = "EP-Launch-Lite"
+
+
+class Window(gtk.Window):
     """
-    This class is the main window class for EP-Luanch-Light
+    This class is the main window class for EP-Launch-Lite
     """
 
     def __init__(self, settings):
@@ -21,14 +25,13 @@ class EPLaunchLightWindow(gtk.Window):
         """
 
         # initialize the parent class
-        super(EPLaunchLightWindow, self).__init__()
+        super(Window, self).__init__()
 
         # this flag will be used to trigger a restart from the calling manager
         self.doing_restart = False
 
         # initialize some class-level "constants"
         self.box_spacing = 4
-        self.settings_file_name = os.path.join(os.path.expanduser("~"), ".eplaunchlight.json")
 
         # initialize instance variables to be set later
         self.input_file_path = None
@@ -63,7 +66,10 @@ class EPLaunchLightWindow(gtk.Window):
         self.check_file_paths(None)
 
     def quit(self, widget=None):
-        gtk.main_quit()
+        try:
+            gtk.main_quit()
+        except RuntimeError:
+            pass  # ignore the called outside of a mainloop in this instance
 
     def build_gui(self):
         """
@@ -77,7 +83,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.set_border_width(0)
 
         # set the window title
-        self.set_title(_("EnergyPlus Launch Light"))
+        self.set_title(__program_name__)
 
         # add the body
         self.add(self.gui_build_body())
@@ -239,7 +245,7 @@ class EPLaunchLightWindow(gtk.Window):
             flags=0,
             type=gtk.MESSAGE_ERROR,
             buttons=gtk.BUTTONS_YES_NO,
-            message_format=_("EnergyPlus Launch Light"))
+            message_format=__program_name__)
         dialog.set_title(_("Message"))
         dialog.format_secondary_text(
             _("You must restart the app to make the language change take effect.  Would you like to restart now?"))
@@ -388,7 +394,7 @@ class EPLaunchLightWindow(gtk.Window):
                                     flags=0,
                                     type=gtk.MESSAGE_ERROR,
                                     buttons=gtk.BUTTONS_OK,
-                                    message_format=_("EnergyPlus Launch Light"))
+                                    message_format=__program_name__)
         message.set_title(_("Error performing prior action:"))
         message.format_secondary_text(message_text)
         message.run()

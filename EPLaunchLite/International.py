@@ -23,7 +23,6 @@ EnglishDictionary = {
     'E+ Version': 'E+ Version',
     'EnergyPlus Failed': 'EnergyPlus Failed',
     'EnergyPlus Failed!': 'EnergyPlus Failed!',
-    'EnergyPlus Launch Light': 'EnergyPlus Launch Light',
     'EnergyPlus Simulation Output:': 'EnergyPlus Simulation Output:',
     'EPW files': 'EPW files',
     'Error file is the best place to start.  Would you like to open the Run Folder?':
@@ -41,6 +40,7 @@ EnglishDictionary = {
     'Select input file': 'Select input file',
     'Select weather file': 'Select weather file',
     'Simulate': 'Simulate',
+    'Simulation cancelled': 'Simulation cancelled',
     'Simulation Output': 'Simulation Output',
     'Simulation completed': 'Simulation completed',
     'Simulation failed': 'Simulation failed',
@@ -60,7 +60,6 @@ SpanishDictionary = {
     'E+ Version': 'E+ Version',
     'EnergyPlus Failed': 'EnergyPlus fallado',
     'EnergyPlus Failed!': 'EnergyPlus fallado!',
-    'EnergyPlus Launch Light': 'EnergyPlus Launch Light',
     'EnergyPlus Simulation Output:': 'EnergyPlus salida de la simulacion:',
     'EPW files': 'EPW archivos',
     'Error file is the best place to start.  Would you like to open the Run Folder?':
@@ -78,6 +77,7 @@ SpanishDictionary = {
     'Select input file': 'Seleccionar archivo de entrada',
     'Select weather file': 'Seleccionar archivo de tiempo',
     'Simulate': 'Simular',
+    'Simulation cancelled': 'simulacion cancelado',
     'Simulation Output': 'Salida de la simulacion',
     'Simulation completed': 'Simulacion completado',
     'Simulation failed': 'Simulacion fallo',

@@ -1,6 +1,7 @@
 import json
+import os
 
-from EPLaunchLight.International import Languages
+from International import Languages
 
 
 class Keys:

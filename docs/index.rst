@@ -14,7 +14,7 @@ Contents:
    EnergyPlusPath
    EnergyPlusThread
    FileTypes
-   EPLaunchLightWindow
+   EPLaunchLiteWindow
 
 
 Indices and tables
