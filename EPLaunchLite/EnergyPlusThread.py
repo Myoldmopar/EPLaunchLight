@@ -24,12 +24,14 @@ class EnergyPlusThread(threading.Thread):
 
     def run(self):
         self.cancelled = False
-        self.run_dir = os.path.join(os.path.dirname(self.input_file),
-                                    'output-' + os.path.splitext(os.path.basename(self.input_file))[0])
+        base_file_name = os.path.splitext(os.path.basename(self.input_file))[0]
+        self.run_dir = os.path.join(os.path.dirname(self.input_file), 'output-' + base_file_name)
         self.p = subprocess.Popen([
             self.run_script,
             '-r',
             '-x',
+            '-p',
+            base_file_name,
             '-d',
             self.run_dir,
             '-w',
