@@ -40,6 +40,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.status_bar = None
         self.status_bar_context_id = None
         self.ep_version_label = None
+        self.edit_idf_button = None
 
         # try to load the settings very early since it includes initialization
         self.settings = settings
@@ -62,7 +63,7 @@ class EPLaunchLightWindow(gtk.Window):
         self.check_file_paths(None)
 
     def quit(self, widget=None):
-        gobject.idle_add(gtk.main_quit)
+        gtk.main_quit()
 
     def build_gui(self):
         """
@@ -153,6 +154,11 @@ class EPLaunchLightWindow(gtk.Window):
         alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
         alignment.add(self.input_file_path)
         hbox1.pack_start(alignment, True, True, self.box_spacing)
+        self.edit_idf_button = gtk.Button(_("Edit Input File.."))
+        self.edit_idf_button.connect("clicked", self.open_input_file)
+        alignment = gtk.Alignment(xalign=1.0, yalign=0.5, xscale=1.0, yscale=0.5)
+        alignment.add(self.edit_idf_button)
+        hbox1.pack_start(alignment, True, True, self.box_spacing)
         vbox.pack_start(self.framed(hbox1), True, True, 0)
 
         # create the weather file button and textbox section
@@ -219,6 +225,12 @@ class EPLaunchLightWindow(gtk.Window):
 
         # return the vbox
         return vbox
+
+    def open_input_file(self, widget):
+        try:
+            subprocess.Popen(['open', self.input_file_path.get_text()], shell=False)
+        except Exception:
+            self.simple_error_dialog(_("Could not open input file"))
 
     def switch_language(self, widget, language):
         self.settings[Keys.language] = language
@@ -345,7 +357,10 @@ class EPLaunchLightWindow(gtk.Window):
         result_dialog.set_size_request(width=500, height=600)
         resp = result_dialog.run()
         if resp == gtk.RESPONSE_YES:
-            subprocess.Popen(['open', run_dir], shell=False)
+            try:
+                subprocess.Popen(['open', run_dir], shell=False)
+            except Exception:
+                self.simple_error_dialog(_("Could not open run directory"))
         result_dialog.destroy()
 
     def cancel_simulation(self, widget):
@@ -362,6 +377,19 @@ class EPLaunchLightWindow(gtk.Window):
         if os.path.exists(idf) and os.path.exists(epw):
             self.message_handler(_("Ready for launch"))
             self.button_sim.set_sensitive(True)
+            self.edit_idf_button.set_sensitive(True)
         else:
             self.message_handler(_("Input and/or Weather file paths are invalid"))
             self.button_sim.set_sensitive(False)
+            self.edit_idf_button.set_sensitive(False)
+
+    def simple_error_dialog(self, message_text):
+        message = gtk.MessageDialog(parent=self,
+                                    flags=0,
+                                    type=gtk.MESSAGE_ERROR,
+                                    buttons=gtk.BUTTONS_OK,
+                                    message_format=_("EnergyPlus Launch Light"))
+        message.set_title(_("Error performing prior action:"))
+        message.format_secondary_text(message_text)
+        message.run()
+        message.destroy()
