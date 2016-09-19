@@ -115,6 +115,16 @@ class Window(gtk.Window):
 
         # create the menu bar itself to hold the menus
         mb = gtk.MenuBar()
+
+        # create the actual actionable items under the file menu
+        menu_item_file_about = gtk.MenuItem(_("About..."))
+        menu_item_file_about.connect("activate", self.about_dialog)
+        menu_item_file_about.show()
+        menu_item_file_exit = gtk.MenuItem(_("Exit"))
+        menu_item_file_exit.connect("activate", self.quit)
+        menu_item_file_exit.show()
+
+        # create the actual actionable items under the language menu
         menu_item_english = gtk.MenuItem("Language: English")
         menu_item_english.connect("activate", self.switch_language, Languages.English)
         menu_item_english.show()
@@ -125,30 +135,27 @@ class Window(gtk.Window):
         menu_item_spanish.show()
         if self.settings[Keys.language] == Languages.Spanish:
             menu_item_spanish.set_sensitive(False)
-        menu_item_file_about = gtk.MenuItem(_("About..."))
-        menu_item_file_about.connect("activate", self.about_dialog)
-        menu_item_file_about.show()
-        menu_item_file_exit = gtk.MenuItem(_("Exit"))
-        menu_item_file_exit.connect("activate", self.quit)
-        menu_item_file_exit.show()
 
-        # create the base root menu item for FILE
-        menu_item_file = gtk.MenuItem(_("File"))
-
-        # create a menu to hold FILE items and put them in there
+        # create the list of items that will eventually be dropped down, and append items in the right order
         filemenu = gtk.Menu()
-        filemenu.append(menu_item_english)
-        filemenu.append(menu_item_spanish)
-        filemenu.append(gtk.SeparatorMenuItem())
         filemenu.append(menu_item_file_about)
         filemenu.append(gtk.SeparatorMenuItem())
         filemenu.append(menu_item_file_exit)
+        langmenu = gtk.Menu()
+        langmenu.append(menu_item_english)
+        langmenu.append(menu_item_spanish)
+
+        # create the root drop-down-able menu items, and assign their submenus to the lists above
+        menu_item_file = gtk.MenuItem(_("File"))
         menu_item_file.set_submenu(filemenu)
+        menu_item_lang = gtk.MenuItem("Language/Idioma")
+        menu_item_lang.set_submenu(langmenu)
 
-        # attach the FILE menu to the main menu bar
+        # attach the root menus to the main menu bar
         mb.append(menu_item_file)
+        mb.append(menu_item_lang)
 
-        # separator
+        # and finally attach the main menu bar to the window
         vbox.pack_start(mb, False)
 
         # create the input file button and textbox section
