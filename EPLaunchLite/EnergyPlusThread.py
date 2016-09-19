@@ -30,6 +30,7 @@ class EnergyPlusThread(threading.Thread):
             self.run_script,
             '-r',
             '-x',
+            '-m',
             '-p',
             base_file_name,
             '-d',

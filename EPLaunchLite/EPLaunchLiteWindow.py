@@ -248,7 +248,9 @@ class Window(gtk.Window):
         try:
             subprocess.Popen(['open', self.input_file_path.get_text()], shell=False)
         except Exception:
-            self.simple_error_dialog(_("Could not open input file"))
+            self.simple_error_dialog(
+                _("Could not open input file, set default application by opening the file separately first.")
+            )
 
     def switch_language(self, widget, language):
         self.settings[Keys.language] = language

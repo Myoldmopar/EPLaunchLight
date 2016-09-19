@@ -21,7 +21,8 @@ EnglishDictionary = {
     'Choose Weather File..': 'Choose Weather File..',
     'Close': 'Close',
     'Could not open run directory': 'Could not open run directory',
-    'Could not open input file': 'Could not open input file',
+    'Could not open input file, set default application by opening the file separately first.':
+        'Could not open input file, set default application by opening the file separately first.',
     'Edit Input File..': 'Edit Input File..',
     'E+ Version': 'E+ Version',
     'EnergyPlus Failed': 'EnergyPlus Failed',
@@ -61,7 +62,9 @@ SpanishDictionary = {
     'Choose Weather File..': 'Elija Tiempo Archivo..',
     'Close': 'Cerca',
     'Could not open run directory': 'No se pudo abrir directorio de ejecucion',
-    'Could not open input file': 'No se pudo abrir el archivo de entrada',
+    'Could not open input file, set default application by opening the file separately first.':
+        'No se pudo abrir el archivo de entrada, ajuste aplicacion ' +
+        'por defecto al abrir el archivo por separado en primer lugar.',
     'Edit Input File..': 'Editar el archivo..',
     'E+ Version': 'E+ Version',
     'EnergyPlus Failed': 'EnergyPlus fallado',
@@ -102,7 +105,6 @@ def report_missing_keys():
 
 
 def translate(key):
-
     # if for some reason blank, just return blank
     if key is None or key == "":
         return ""
