@@ -63,7 +63,7 @@ SpanishDictionary = {
     'Close': 'Cerca',
     'Could not open run directory': 'No se pudo abrir directorio de ejecucion',
     'Could not open input file, set default application by opening the file separately first.':
-        'No se pudo abrir el archivo de entrada, ajuste aplicacion ' +
+        'No se pudo abrir el archivo de entrada, ajuste aplicacion ' +  # noqa: W504
         'por defecto al abrir el archivo por separado en primer lugar.',
     'Edit Input File..': 'Editar el archivo..',
     'E+ Version': 'E+ Version',
@@ -97,7 +97,7 @@ SpanishDictionary = {
 
 def report_missing_keys():
     base_keys = EnglishDictionary.keys()
-    for dict_name, dictionary in {'Spanish': SpanishDictionary}.iteritems():  # add more here
+    for dict_name, dictionary in {'Spanish': SpanishDictionary}.items():  # add more here
         print("Processing missing keys from dictionary: " + dict_name)
         for key in base_keys:
             if key not in dictionary:
