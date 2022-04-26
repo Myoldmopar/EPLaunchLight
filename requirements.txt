@@ -1,0 +1,4 @@
+nose
+py2app
+pycairo
+pygobject
