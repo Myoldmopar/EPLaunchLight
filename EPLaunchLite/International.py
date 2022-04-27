@@ -19,6 +19,8 @@ EnglishDictionary = {
     'Cancelled!': 'Cancelled!',
     'Choose Input File..': 'Choose Input File..',
     'Choose Weather File..': 'Choose Weather File..',
+    "Choose EnergyPlus Install Folder": "Choose EnergyPlus Install Folder",
+    "Choose EnergyPlus Install Folder..": "Choose EnergyPlus Install Folder..",
     'Close': 'Close',
     'Could not open run directory': 'Could not open run directory',
     'Could not open input file, set default application by opening the file separately first.':
@@ -60,6 +62,8 @@ SpanishDictionary = {
     'Cancelled!': 'Cancelado!',
     'Choose Input File..': 'Elija el archivo de entrada..',
     'Choose Weather File..': 'Elija Tiempo Archivo..',
+    "Choose EnergyPlus Install Folder": "Elija EnergyPlus carpeta de instalación",
+    "Choose EnergyPlus Install Folder..": "Elija EnergyPlus carpeta de instalación..",
     'Close': 'Cerca',
     'Could not open run directory': 'No se pudo abrir directorio de ejecucion',
     'Could not open input file, set default application by opening the file separately first.':

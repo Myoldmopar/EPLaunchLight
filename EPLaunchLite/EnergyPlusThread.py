@@ -4,19 +4,18 @@ from subprocess import Popen, PIPE
 import threading
 
 from EPLaunchLite.International import translate as _
-from EPLaunchLite.EnergyPlusPath import SingleEnergyPlusPath
 
 
 class EnergyPlusThread(threading.Thread):
     def __init__(self,
-                 ep_path: SingleEnergyPlusPath,
+                 ep_path: Path,
                  input_file: Path,
                  weather_file: Path,
                  cb_message, cb_success, cb_failure, cb_cancelled):
         self.p = None
         self.std_out = None
         self.std_err = None
-        self.run_script = ep_path.eplus_executable
+        self.run_script = ep_path
         self.input_file = input_file
         self.weather_file = weather_file
         self.msg_callback = cb_message
@@ -61,8 +60,8 @@ class EnergyPlusThread(threading.Thread):
                 self.failure_callback(self.std_out, self.run_dir)
 
     @staticmethod
-    def get_ep_version(ep_path: SingleEnergyPlusPath):
-        p = Popen([ep_path.eplus_executable, '-v'], shell=False, stdout=PIPE, stderr=PIPE)
+    def get_ep_version(ep_path: Path):
+        p = Popen([ep_path, '-v'], shell=False, stdout=PIPE, stderr=PIPE)
         std_out, std_err = p.communicate()
         return std_out.decode('utf-8').strip()
 

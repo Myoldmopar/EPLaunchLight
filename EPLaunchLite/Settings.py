@@ -2,7 +2,6 @@ import json
 import os
 
 from EPLaunchLite.International import Languages
-from EPLaunchLite.EnergyPlusPath import EnergyPlusPathManager
 
 
 class Keys:
@@ -11,7 +10,7 @@ class Keys:
     last_idf = 'last_idf'
     last_epw = 'last_epw'
     language = 'language'
-    install_root = 'install_root'
+    last_ep_path = 'last_ep_path'
 
 
 def load_settings(settings_file_name):
@@ -30,8 +29,8 @@ def load_settings(settings_file_name):
         settings[Keys.last_epw] = '/path/to/epw'
     if Keys.language not in settings:
         settings[Keys.language] = Languages.English
-    if Keys.install_root not in settings:
-        settings[Keys.install_root] = EnergyPlusPathManager.platform_install_root()
+    if Keys.last_ep_path not in settings:
+        settings[Keys.last_ep_path] = ''
     return settings
 
 

@@ -14,7 +14,6 @@ try:
     has_gtk = True
 except ImportError as e:
     has_gtk = False
-from EPLaunchLite.EnergyPlusPath import EnergyPlusPathManager, SingleEnergyPlusPath
 from EPLaunchLite.EnergyPlusThread import EnergyPlusThread
 
 
@@ -47,30 +46,13 @@ class TestFileTypes(unittest.TestCase):
         self.assertIsNone(result)
 
 
-class TestEnergyPlusPaths(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_dir = Path(tempfile.mkdtemp())
-
-    def test_proper_path_no_trailing_slash(self):
-        eplus_dir = self.temp_dir / 'EnergyPlus-8-1-0'
-        make_eplus_executable(eplus_dir)
-        eight_one = SingleEnergyPlusPath(eplus_dir).get_version_number()
-        self.assertEqual(eight_one, '8-1-0')
-
-    def test_path_without_eplus(self):
-        eplus_dir = self.temp_dir / 'EnergyMinus-8-1-0'
-        make_eplus_executable(eplus_dir)
-        eight_one = SingleEnergyPlusPath(eplus_dir).get_version_number()
-        self.assertIsNone(eight_one)
-
-
 class TestEnergyPlusThread(unittest.TestCase):
     def test_construction(self):
         paths = ['/dummy/', '/path', '/to_nothing']
         temp_dir = Path(tempfile.mkdtemp())
         eplus_dir = temp_dir / 'EnergyPlus-8-1-0'
         make_eplus_executable(eplus_dir)
-        obj = EnergyPlusThread(SingleEnergyPlusPath(eplus_dir), Path(paths[1]), Path(paths[2]), None, None, None, None)
+        obj = EnergyPlusThread(eplus_dir / 'energyplus', Path(paths[1]), Path(paths[2]), None, None, None, None)
         self.assertTrue(isinstance(obj, threading.Thread))
         self.assertTrue(obj.run_script, paths[0])
         self.assertTrue(obj.input_file, paths[1])
