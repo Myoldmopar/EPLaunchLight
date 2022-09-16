@@ -10,7 +10,7 @@ env:
 
 jobs:
   mac_release:
-    runs-on: macos-10.15
+    runs-on: macos-11
     permissions:
       # Needed permission to upload the release asset
       contents: write
