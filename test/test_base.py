@@ -29,15 +29,15 @@ class TestFileTypes(unittest.TestCase):
         msg, filters = FileTypes.get_materials(FileTypes.IDF)
         self.assertEqual(len(filters), 2)  # should return 2: idf and imf
         # make sure we have each one, idf and imf
-        idf_filters = [x for x in filters if 'IDF' in x.get_name()]
+        idf_filters = [x for x in filters if 'IDF' in x[0]]
         self.assertTrue(len(idf_filters), 1)
-        imf_filters = [x for x in filters if 'IMF' in x.get_name()]
+        imf_filters = [x for x in filters if 'IMF' in x[0]]
         self.assertTrue(len(imf_filters), 1)
 
     def test_epw_file_type(self):
         msg, filters = FileTypes.get_materials(FileTypes.EPW)
         self.assertEqual(len(filters), 1)
-        epw_filters = [x for x in filters if 'EPW' in x.get_name()]
+        epw_filters = [x for x in filters if 'EPW' in x[0]]
         self.assertTrue(len(epw_filters), 1)
 
     def test_invalid_file_type(self):

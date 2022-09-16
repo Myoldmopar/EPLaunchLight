@@ -3,8 +3,6 @@ from pathlib import Path
 from subprocess import Popen, PIPE
 import threading
 
-from EPLaunchLite.International import translate as _
-
 
 class EnergyPlusThread(threading.Thread):
     def __init__(self,
@@ -46,18 +44,18 @@ class EnergyPlusThread(threading.Thread):
             shell=False,
             stdout=PIPE,
             stderr=PIPE)
-        self.msg_callback(_("Simulation started"))
+        self.msg_callback("Simulation started")
         self.std_out, self.std_err = self.p.communicate()
         if self.cancelled:
-            self.msg_callback(_("Simulation cancelled"))
+            self.msg_callback("Simulation cancelled")
             self.cancelled_callback()
         else:
             if self.p.returncode == 0:
-                self.msg_callback(_("Simulation completed"))
-                self.success_callback(self.std_out, self.run_dir)
+                self.msg_callback("Simulation completed")
+                self.success_callback(self.std_out)
             else:
-                self.msg_callback(_("Simulation failed"))
-                self.failure_callback(self.std_out, self.run_dir)
+                self.msg_callback("Simulation failed")
+                self.failure_callback(self.std_out)
 
     @staticmethod
     def get_ep_version(ep_path: Path):
@@ -67,6 +65,6 @@ class EnergyPlusThread(threading.Thread):
 
     def stop(self):
         if self.p.poll() is None:
-            self.msg_callback(_("Attempting to cancel simulation ..."))
+            self.msg_callback("Attempting to cancel simulation ...")
             self.cancelled = True
             self.p.kill()
