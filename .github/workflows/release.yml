@@ -33,7 +33,7 @@ jobs:
       run: python3 setup.py py2app
 
     - name: Create tarball to upload
-      run: tar EPLaunchLiteApp.tar.gz dist/EP-Launch-List.app
+      run: tar czf EPLaunchLiteApp.tar.gz dist/EP-Launch-List.app
 
     - name: Inspect bundle
       run: tree .
