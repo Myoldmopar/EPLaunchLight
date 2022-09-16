@@ -41,5 +41,3 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: dist/EP-Launch-Lite.app
         tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
