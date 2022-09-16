@@ -32,6 +32,9 @@ jobs:
     - name: Package up the bundle
       run: python3 setup.py py2app
 
+    - name: Create tarball to upload
+      run: tar EPLaunchLiteApp.tar.gz dist/EP-Launch-List.app
+
     - name: Inspect bundle
       run: tree .
 
@@ -39,5 +42,5 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: dist/EP-Launch-Lite.app
+        file: EPLaunchLiteApp.tar.gz
         tag: ${{ github.ref }}
