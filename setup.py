@@ -11,7 +11,7 @@ APP = ['EP-Launch-Lite.py']
 DATA_FILES = []
 OPTIONS = {
     'argv_emulation': True,
-    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'subprocess', 'glob', 'json', 'subprocess']
+    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'glob', 'json', 'subprocess']
 }
 
 setup(
