@@ -11,6 +11,6 @@ from setuptools import setup
 setup(
     app=['EP-Launch-Lite.py'],
     data_files=[],
-    options={'py2app': {'argv_emulation': True}},
+    options={'py2app': {}},
     setup_requires=['py2app'],
 )
