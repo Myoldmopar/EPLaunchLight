@@ -2,7 +2,7 @@ import os
 import subprocess
 import threading
 
-from International import translate as _
+from EPLaunchLite.International import translate as _
 
 
 class EnergyPlusThread(threading.Thread):

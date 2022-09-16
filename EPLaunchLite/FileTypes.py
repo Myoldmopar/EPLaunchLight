@@ -1,6 +1,6 @@
 import gtk
 
-from International import translate as _
+from EPLaunchLite.International import translate as _
 
 
 class FileTypes(object):

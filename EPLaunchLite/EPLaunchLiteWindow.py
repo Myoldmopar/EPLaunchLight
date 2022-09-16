@@ -4,11 +4,11 @@ import subprocess
 import gobject
 import gtk
 
-from EnergyPlusPath import EnergyPlusPath
-from EnergyPlusThread import EnergyPlusThread
-from FileTypes import FileTypes
-from International import translate as _, Languages, set_language
-from Settings import Keys
+from EPLaunchLite.EnergyPlusPath import EnergyPlusPath
+from EPLaunchLite.EnergyPlusThread import EnergyPlusThread
+from EPLaunchLite.FileTypes import FileTypes
+from EPLaunchLite.International import translate as _, Languages, set_language
+from EPLaunchLite.Settings import Keys
 
 
 __program_name__ = "EP-Launch-Lite (v2.0)"
