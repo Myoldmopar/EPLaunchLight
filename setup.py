@@ -7,16 +7,10 @@ Usage:
 
 from setuptools import setup
 
-APP = ['EP-Launch-Lite.py']
-DATA_FILES = []
-OPTIONS = {
-    'argv_emulation': True,
-    'includes': ['cairo', 'gobject', 'gio', 'pango', 'pangocairo', 'atk', 'subprocess', 'glob', 'json', 'subprocess']
-}
 
 setup(
-    app=APP,
-    data_files=DATA_FILES,
-    options={'py2app': OPTIONS},
+    app=['EP-Launch-Lite.py'],
+    data_files=[],
+    options={'py2app': {'argv_emulation': True}},
     setup_requires=['py2app'],
 )

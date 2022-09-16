@@ -23,6 +23,9 @@ jobs:
       with:
         python-version: 3.8
 
+    - name: Install Pip Dependencies
+      run: pip install py2app
+
     - name: Package up the bundle
       run: python3 setup.py py2app
 

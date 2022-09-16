@@ -1,4 +1,4 @@
-name: Build Package and Run Tests
+name: Run Tests
 
 on: [push]
 
@@ -15,5 +15,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+      - name: Install Pip Dependencies
+        run: pip install nose
       - name: Run Tests
         run: nosetests --with-coverage --cover-package EPLaunchLite  # --cover-html for local html results
