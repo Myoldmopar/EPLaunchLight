@@ -26,6 +26,9 @@ jobs:
     - name: Install Pip Dependencies
       run: pip install py2app
 
+    - name: Install Brew Dependencies
+      run: brew install tree
+
     - name: Package up the bundle
       run: python3 setup.py py2app
 
