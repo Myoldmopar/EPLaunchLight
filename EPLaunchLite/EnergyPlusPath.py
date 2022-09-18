@@ -46,4 +46,4 @@ class EnergyPlusPathManager:
         if system() == 'Linux':
             return Path('/usr/local/bin')
         else:
-            return Path('Applications')
+            return Path('/Applications')

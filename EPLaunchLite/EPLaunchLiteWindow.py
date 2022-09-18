@@ -188,9 +188,9 @@ class Window:
     def callback_handler_failure(self, std_out):
         self.gui_queue.put(lambda: self.failed_simulation(std_out))
 
-    def failed_simulation(self, _):
+    def failed_simulation(self, std_out):
         self.update_run_buttons(running=False)
-        mb.showerror(title="EnergyPlus Failed", message="EnergyPlus Failed!")
+        mb.showerror(title="EnergyPlus Failed", message=f"EnergyPlus Failed! Standard Output: \n{std_out}")
 
     def callback_handler_success(self, std_out):
         self.gui_queue.put(lambda: self.completed_simulation(std_out))
