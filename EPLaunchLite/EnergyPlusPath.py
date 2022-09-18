@@ -1,38 +1,49 @@
-import glob
+from pathlib import Path
+from platform import system
 
 
-class EnergyPlusPath(object):
-    """
-    This class provides static helpers for moving between EnergyPlus install paths and version numbers
-
-    *Note that this class holds no instance data.*
-    """
-
-    @staticmethod
-    def get_version_number_from_path(path):
+class EnergyPlusPathManager:
+    def __init__(self, predefined_path_string: str):
         """
-        This function takes a Mac EnergyPlus installation path, and returns just the version number portion
-
-        * path: An installation path on Mac, following the form: '/Applications/EnergyPlus-?-?-?/'
-        * Returns: Just the version number suffix, in the form: '?-?-?'
+        Manages the E+ path for this tool.  If the path is valid, this class instance's .valid member will be True.
+        If valid is True, then you should be able to rely on the .eplus_path member variable to be the path to the
+        EnergyPlus install root, and .executable should be the path to the EnergyPlus binary file.
         """
-        ep_folder = path.split('/')[2]
-        if 'EnergyPlus' not in ep_folder:
-            return None
-        return ep_folder[11:]
+        if predefined_path_string:
+            self.set_user_specified_path(Path(predefined_path_string))
+            return
+        # if we didn't get a predefined string, try to find the E+ root based on the current file
+        this_file_path = Path(__file__).resolve()
+        all_folder_names = this_file_path.parts
+        self.eplus_path = this_file_path
+        self.valid = False
+        self.executable = None
+        for x in range(len(all_folder_names)):
+            self.eplus_path = self.eplus_path.parent  # trim off last item, the first time through this trim a file off
+            if 'EnergyPlus' in self.eplus_path.name:  # if the final item has 'EnergyPlus', we assume we're at the root
+                self.validate_path()
+                break
+        else:
+            # if we didn't find 'EnergyPlus', we don't appear to be in an E+ install, just give a dummy path
+            self.eplus_path = EnergyPlusPathManager.platform_install_root() / 'EnergyPlus-X-Y-Z'
+
+    def set_user_specified_path(self, user_path: Path = None):
+        self.eplus_path = user_path
+        self.validate_path()
+
+    def validate_path(self):
+        self.valid = False
+        if not self.eplus_path.exists():
+            return
+        for ep_filename in ['energyplus', 'EnergyPlus']:
+            if (self.eplus_path / ep_filename).exists():
+                self.executable = self.eplus_path / ep_filename
+                self.valid = True
+                return
 
     @staticmethod
-    def get_path_from_version_number(version):
-        return '/Applications/EnergyPlus-%s' % version
-
-    @staticmethod
-    def get_latest_eplus_version():
-        # get all the installed versions first, sorted
-        install_folders = glob.glob('/Applications/EnergyPlus*')
-
-        # then process them into a nice list
-        ep_versions = sorted([EnergyPlusPath.get_version_number_from_path(x) for x in install_folders])
-
-        # set current_entry to something meaningful if needed
-        new_version = ep_versions[-1]
-        return EnergyPlusPath.get_path_from_version_number(new_version)
+    def platform_install_root() -> Path:
+        if system() == 'Linux':
+            return Path('/usr/local/bin')
+        else:
+            return Path('/Applications')

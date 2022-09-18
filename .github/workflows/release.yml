@@ -1,0 +1,46 @@
+name: Mac Releases
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  mac_release:
+    runs-on: macos-11
+    permissions:
+      # Needed permission to upload the release asset
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install Pip Dependencies
+      run: pip install py2app
+
+    - name: Install Brew Dependencies
+      run: brew install tree
+
+    - name: Package up the bundle
+      run: python3 setup.py py2app
+
+    - name: Create tarball to upload
+      run: tar czf EPLaunchLiteApp.tar.gz dist/EP-Launch-Lite.app
+
+    - name: Inspect bundle
+      run: tree .
+
+    - name: Upload asset
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: EPLaunchLiteApp.tar.gz
+        tag: ${{ github.ref }}
