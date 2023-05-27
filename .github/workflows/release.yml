@@ -25,7 +25,7 @@ jobs:
       run: pip install modulegraph==0.19.2 py2app==0.25
 
     - name: Install Brew Dependencies
-      run: brew install tree
+      run: brew install tree pygobject3 gtk4
 
     - name: Package up the bundle
       run: python setup.py py2app
