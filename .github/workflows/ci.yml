@@ -25,7 +25,8 @@ jobs:
       run: pip install modulegraph==0.19.2 py2app==0.25
 
     - name: Install Brew Dependencies
-      run: brew install tree gtk+3
+      run: brew install tree
+      # gtk+3
       # This is for PYTHON 3: pygobject3 gtk4
 
     - name: install macports
@@ -33,10 +34,12 @@ jobs:
         wget https://github.com/macports/macports-base/releases/download/v2.8.0/MacPorts-2.8.0-11-BigSur.pkg
         sudo installer -pkg ./MacPorts-2.8.0-11-BigSur.pkg -target /
         rm -Rf MacPorts-2.8.0-11-BigSur.pkg
+        echo "/opt/local/bin" >> $GITHUB_PATH
 
     - name: install Pygobject from macports
       run: |
-        port install py27-gobject
+        port install py27-pygtk
+        # depends on py27-gobject py27-cairo
 
     - name: Package up the bundle
       run: python setup.py py2app
