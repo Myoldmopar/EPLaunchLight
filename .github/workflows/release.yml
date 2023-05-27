@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install Pip Dependencies
-      run: pip install modulegraph==0.19.2 py2app
+      run: pip install py2app==0.28
 
     - name: Install Brew Dependencies
       run: brew install tree
