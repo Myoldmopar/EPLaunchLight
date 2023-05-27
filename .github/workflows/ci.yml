@@ -38,7 +38,7 @@ jobs:
 
     - name: install Pygobject from macports
       run: |
-        port install py27-pygtk
+        sudo port install py27-pygtk
         # depends on py27-gobject py27-cairo
 
     - name: Package up the bundle
